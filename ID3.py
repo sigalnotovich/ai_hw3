@@ -20,6 +20,7 @@ def find_entropy_attribute(df, attribute):
     # variables = df[attribute].unique()  # This gives all the values in the column of the attribute ,if there is a
     # duplicate, then only once
     # print(variables)
+    entropy_list = []
     borders = dynamic_division(df, attribute)
     sum_of_lines = len(df)
     entropy_attribute = 0
@@ -28,17 +29,18 @@ def find_entropy_attribute(df, attribute):
         p_B = num_B/sum_of_lines
         num_M = len(df[attribute][df[attribute] < border][df.diagnosis == 'M'])
         p_M = num_M / sum_of_lines
-        h_first_sun = -p_B * log(p_B) - p_M * log(p_M)
+        h_first_sun = -p_B * log(p_B + eps) - p_M * log(p_M + eps)
         num_B = len(df[attribute][df[attribute] > border][df.diagnosis == 'B'])
         p_B = num_B / sum_of_lines
         num_M = len(df[attribute][df[attribute] > border][df.diagnosis == 'M'])
         p_M = num_M / sum_of_lines
-        h_second_sun = -p_B * log(p_B) - p_M * log(p_M)
+        h_second_sun = -p_B * log(p_B + eps) - p_M * log(p_M + eps)
 
         relation_of_chosen_from_all = len(df[attribute][df[attribute] < border])/len(df)
         new_entropy = relation_of_chosen_from_all * h_first_sun + relation_of_chosen_from_all * h_second_sun
+        entropy_list.append(new_entropy)
 
-    return new_entropy
+    return entropy_list
 
     # entropy_attribute = 0
     # for variable in variables: #variable should be a threshold for which after him you are B and after you are M
@@ -62,13 +64,21 @@ def dynamic_division(df, attribute):
     #print(variables)
     borders = lambda lst: [(lst[i] + lst[i + 1])/2 for i in range(0, len(lst) - 1)]
     #print(borders(variables))
-    return borders
+    return borders(variables)
 
 df = pd.read_csv("train.csv", header=0)
 initial_entropy_in_database(df)
+entropy_list = []
 for attribute in df.keys()[1:]:
     # print(attribute)
-    find_entropy_attribute(df, attribute)
+    received_entropy_list = find_entropy_attribute(df, attribute)
+    entropy_list += received_entropy_list
+
+#todo: use the entropy_list to choose the best attribute to use.
+#reminder: now the entropy list is for every attribute i parsed on the boards and saw the entropy
+#now i need to add the name of feture and the limit(where we cut to both of the group) to the list
+#and then return the best feture and limit
+
 # print(df)
 
 

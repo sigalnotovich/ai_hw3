@@ -1,19 +1,24 @@
 import numpy as np
 import pandas as pd
+import csv
 
 eps = np.finfo(float).eps
 from numpy import log2 as log
 
 
 
-def get_entropy_before_division(df):
-    entropy_node = 0  # Initialize Entropy
-    values = df.diagnosis.unique()  # Unique objects - 'B', 'M'
-    for value in values:
-        fraction = df.diagnosis.value_counts()[value] / len(df.diagnosis)
-        entropy_node += -fraction * np.log2(fraction)
-        # print(entropy_node)  # todo: remove
-    return entropy_node
+def get_entropy_before_division(df,list_of_B_and_M):
+    entropy_node = 0
+    #for B:
+    sum_of_values = len(list_of_B_and_M)
+    sum_of_B = len([x for x in list_of_B_and_M if x == 'B'])
+    sum_of_M = len([x for x in list_of_B_and_M if x == 'M'])
+    fraction_B = sum_of_B/sum_of_values
+    fraction_M = sum_of_M/sum_of_values
+    entropy_B = -fraction_B * np.log2(fraction_B)
+    entropy_M = -fraction_M * np.log2(fraction_M)
+    entropy = entropy_B + entropy_M
+    return entropy
 
 
 #takes an attribute,looks at its values and devide into borders ,as we saw in the lecture,
@@ -67,8 +72,8 @@ def get_division_options_entropy_list(df):
 
 
 
-def MAX_IG(df):
-    entropy_before_division = get_entropy_before_division(df)
+def MAX_IG(df,list_of_B_and_M):
+    entropy_before_division = get_entropy_before_division(df,list_of_B_and_M)
     division_options_entropy_list = get_division_options_entropy_list(df)
     IG = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in division_options_entropy_list]
     best_entropy_dif, best_attribute_name,  best_attribute_limit = max(IG,key=lambda item: item[0])  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)
@@ -127,8 +132,8 @@ def buildTree(df, tree=None):
 
     return tree
 
-def getMajorityClass(df):
-    list_of_B_and_M = df['diagnosis'].tolist()
+
+def getMajorityClass(list_of_B_and_M):
     number_of_B = list_of_B_and_M.count('B')
     number_of_M = list_of_B_and_M.count('M')
     if number_of_B > number_of_M:
@@ -139,25 +144,30 @@ def getMajorityClass(df):
 
 def ID3(df,node):
 
-    majority_class = getMajorityClass(df)
+    list_of_B_and_M = [line[0] for line in df[1]]
+    majority_class = getMajorityClass(list_of_B_and_M)
 
     return TDIDT(df,majority_class,MAX_IG,node)
 
 
 def TDIDT(df, majority_class ,MAX_IG,node):  #TDIDT(E, F, Default, SelectFeature)
-    if df.empty == True:
+    if df[1].size == 0:
         node.classification = majority_class
         return None
 
-    majority_class = getMajorityClass(df)
+    list_of_B_and_M = [line[0] for line in df[1]]
 
-    B_M_or_both = df['diagnosis'].unique().tolist()
+    B_M_or_both = set(list_of_B_and_M)
     if len(B_M_or_both) == 1 : #only B or only M
         classification = B_M_or_both[0]
         node.classification = classification
         return None
 
-    best_entropy_dif, best_attribute_name, best_attribute_limit = MAX_IG(df)
+
+    #majority_class = getMajorityClass(list_of_B_and_M) #todo: do i need it here?
+
+
+    best_entropy_dif, best_attribute_name, best_attribute_limit = MAX_IG(df,list_of_B_and_M)
     node.partition_feature_and_limit = (best_attribute_name, best_attribute_limit)
     subtable_under_limit = get_subtable_under_limit(df, best_attribute_name, best_attribute_limit)
     node.left = Node()
@@ -180,12 +190,28 @@ class Node:
 
 
 
+# header = np.genfromtxt('train.csv', dtype=float, delimiter=',', names=True)
 
 df = pd.read_csv("train.csv", header=0)
+data_without_header = df.to_numpy()
+
+
+with open('train.csv', 'r') as f:
+    header = list(csv.reader(f, delimiter=';'))[0]
+
+df = (header,data_without_header)
+# print(data_without_header)
+# print(header)
+print(df[0])
+print(df[1])
 node = Node()
 ID3(df,node)
-print(node)
+#print(node)
 #res = get_subtable(df,'perimeter_mean',54.09)
 #print(res)
 
-buildTree(df)
+
+
+
+
+#buildTree(df)

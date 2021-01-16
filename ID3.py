@@ -5,6 +5,7 @@ eps = np.finfo(float).eps
 from numpy import log2 as log
 
 
+#todo: do i need initial entropy in this way?
 def initial_entropy_in_database(df):
     entropy_node = 0  # Initialize Entropy
     values = df.diagnosis.unique()  # Unique objects - 'B', 'M'
@@ -12,8 +13,11 @@ def initial_entropy_in_database(df):
         fraction = df.diagnosis.value_counts()[value] / len(df.diagnosis)
         entropy_node += -fraction * np.log2(fraction)
         # print(entropy_node)  # todo: remove
+    return entropy_node
 
 
+#takes an attribute,looks at its values and devide into borders ,as we saw in the lecture,
+#then add the sum over i to k of |Ei|/|E| * H(Ei) to the entropy_list
 def find_entropy_attribute(df, attribute):
     #B_or_M = df.diagnosis.unique()  # This gives all 'B' and 'M'
     #print(B_or_M)
@@ -66,13 +70,30 @@ def dynamic_division(df, attribute):
     #print(borders(variables))
     return borders(variables)
 
+#get the entropy for all the attributes when each attribute devided to borders as we saw in the lecture
+def get_entropy_list(df):
+    entropy_list = []
+    for attribute in df.keys()[1:]:
+        # print(attribute)
+        received_entropy_list = find_entropy_attribute(df, attribute)
+        entropy_list += received_entropy_list
+    return entropy_list
+
+
 df = pd.read_csv("train.csv", header=0)
-initial_entropy_in_database(df)
-entropy_list = []
-for attribute in df.keys()[1:]:
-    # print(attribute)
-    received_entropy_list = find_entropy_attribute(df, attribute)
-    entropy_list += received_entropy_list
+initial_entropy = initial_entropy_in_database(df)
+entropy_list = get_entropy_list(df)
+print(entropy_list)
+IG = []
+IG = [initial_entropy - e for e in entropy_list]
+# for e in entropy_list:
+#     difference_in_entropy = initial_entropy - e
+#     IG.append(difference_in_entropy)
+print(IG)
+#best_parameter = df.keys()[:-1][np.argmax(IG)]
+#print(best_parameter)
+
+
 
 #todo: use the entropy_list to choose the best attribute to use.
 #reminder: now the entropy list is for every attribute i parsed on the boards and saw the entropy

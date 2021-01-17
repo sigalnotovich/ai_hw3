@@ -31,7 +31,8 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
     borders_func = lambda list: [(list[i] + list[i + 1]) / 2 for i in
                                       range(0, len(list) - 1)]
     list_of_sorted_values = sorted(unsorted_list_of_values, key=lambda x: x, reverse=False)
-    borders = borders_func(list_of_sorted_values)
+    list_of_sorted_values_no_duplicates = list(dict.fromkeys(list_of_sorted_values))
+    borders = borders_func(list_of_sorted_values_no_duplicates)
     #print(list_of_values)
     #print(borders)
 
@@ -284,7 +285,7 @@ def fit():
     return node
     # print(node)
 
-
+# checked
 def getAttributeCalumn(header,node):
     attribute_column = -1
     for i in range(0, len(header)):
@@ -300,7 +301,7 @@ def predict(node):
     df = pd.read_csv("test.csv", header=0)
     data_without_header = df.to_numpy()
 
-    with open('train.csv', newline='') as f:
+    with open('test.csv', newline='') as f:
         reader = csv.reader(f)
         header = next(reader)
 
@@ -322,11 +323,11 @@ def return_prediction_good_or_bad_for_a_line_of_data(header,node, data_line):
             return False
     else:
         # there is partition here
-        attribute_column = getAttributeCalumn(header)
+        attribute_column = getAttributeCalumn(header,node)
         if data_line[attribute_column] < node.partition_feature_and_limit[1]:
-            return_prediction_good_or_bad_for_a_line_of_data(header, node.left, data_line)  # under limit
+            return return_prediction_good_or_bad_for_a_line_of_data(header, node.left, data_line)  # under limit
         else:
-            return_prediction_good_or_bad_for_a_line_of_data(header, node.right, data_line)  # above or equal to limit
+            return return_prediction_good_or_bad_for_a_line_of_data(header, node.right, data_line)  # above or equal to limit
 
 
 node = fit()

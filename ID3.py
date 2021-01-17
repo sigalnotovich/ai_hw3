@@ -130,9 +130,11 @@ def get_subtable_under_and_above_equal_to_limit(df,attribute, limit):
     subtable_under_limit = []
     subtable_above_equal_to_limit = []
     attribute_column = -1
-    for i in df[0] :
-        if i == attribute :
+    for i in range(0, len(df[0])):
+        if df[0][i] == attribute:
             attribute_column = i
+            break
+
     for j in df[1]:
         if j[attribute_column] < limit:
             subtable_under_limit.append(j)
@@ -140,8 +142,10 @@ def get_subtable_under_and_above_equal_to_limit(df,attribute, limit):
             subtable_above_equal_to_limit.append(j)
 
     df_under_limit = (df[0],subtable_under_limit)
-    df__above_equal_to_limit = (df[0],subtable_above_equal_to_limit)
-    return df_under_limit , df__above_equal_to_limit
+    df_above_equal_to_limit = (df[0],subtable_above_equal_to_limit)
+    #print(df_under_limit[1][3])
+    #print(df_above_equal_to_limit[1][3])
+    return df_under_limit , df_above_equal_to_limit
 
 # def get_subtable_under_limit(df, attribute, limit):
 #     return df[df[attribute] < limit].reset_index(drop=True)
@@ -217,16 +221,16 @@ def ID3(df,node):
     return TDIDT(df,majority_class,MAX_IG,node)
 
 #df[0] = heaser of the file, df[1] = all the other data in the file
-def TDIDT(df, majority_class ,MAX_IG,node):  #TDIDT(E, F, Default, SelectFeature)
-    if df[1].size == 0:
-        node.classification = majority_class
+def TDIDT(df, majority_class_df_under_limit, MAX_IG, node):  #TDIDT(E, F, Default, SelectFeature)
+    if len(df[1]) == 0:
+        node.classification = majority_class_df_under_limit
         return None
 
     list_of_B_and_M = [line[0] for line in df[1]]
 
     B_M_or_both = set(list_of_B_and_M)
     if len(B_M_or_both) == 1 : #only B or only M
-        classification = B_M_or_both[0]
+        classification = B_M_or_both.pop()
         node.classification = classification
         return None
 
@@ -237,14 +241,22 @@ def TDIDT(df, majority_class ,MAX_IG,node):  #TDIDT(E, F, Default, SelectFeature
     # save at node the best attribute and limit for it
     node.partition_feature_and_limit = (best_attribute_name, best_attribute_limit)
 
-    df_under_limit, df__above_equal_to_limit = get_subtable_under_and_above_equal_to_limit(df, best_attribute_name, best_attribute_limit)
+    df_under_limit, df_above_equal_to_limit = get_subtable_under_and_above_equal_to_limit(df, best_attribute_name, best_attribute_limit)
+    #pd.DataFrame(df_under_limit[1]).to_csv("C:/My Stuff/studies/2021a/AI/hw3/df_under_limit.csv")
+    #pd.DataFrame(df_above_equal_to_limit[1]).to_csv("C:/My Stuff/studies/2021a/AI/hw3/df_above_equal_to_limit.csv")
+
     # construct left and right node
     node.left = Node()
-    # majority_class = TODO
-    TDIDT(df_under_limit, majority_class ,MAX_IG,node.left)
+    list_of_B_and_M_under_limit = [line[0] for line in df_under_limit[1]]
+    majority_class_df_under_limit = getMajorityClass(list_of_B_and_M_under_limit)
+    TDIDT(df_under_limit, majority_class_df_under_limit, MAX_IG, node.left)
+
     node.right = Node()
-    # majority_class = TODO
-    TDIDT(df__above_equal_to_limit, majority_class ,MAX_IG,node.right)
+    list_of_B_and_M_above_equal_to_limit = [line[0] for line in df_above_equal_to_limit[1]]
+    majority_above_equal_to_limit = getMajorityClass(list_of_B_and_M_above_equal_to_limit)
+    TDIDT(df_above_equal_to_limit, majority_above_equal_to_limit, MAX_IG, node.right)
+
+    return None
 
 class Node:
     def __init__(self):
@@ -254,37 +266,68 @@ class Node:
         self.classification = None
 
 
-
-
-
-
-
-
 # header = np.genfromtxt('train.csv', dtype=float, delimiter=',', names=True)
 
-df = pd.read_csv("train.csv", header=0)
-data_without_header = df.to_numpy()
+def fit():
+    df = pd.read_csv("train.csv", header=0)
+    data_without_header = df.to_numpy()
 
-with open('train.csv', newline='') as f:
-  reader = csv.reader(f)
-  header = next(reader)
+    with open('train.csv', newline='') as f:
+      reader = csv.reader(f)
+      header = next(reader)
 
-#with open('train.csv', 'r') as f:
-#    header = list(csv.reader(f, delimiter=';'))[0]
-
-df = (header,data_without_header)
-# print(data_without_header)
-# print(header)
-print(df[0])
-print(df[1])
-node = Node()
-ID3(df,node)
-#print(node)
-#res = get_subtable(df,'perimeter_mean',54.09)
-#print(res)
+    df = (header, data_without_header)
+    print(df[0])
+    print(df[1])
+    node = Node()
+    ID3(df, node)
+    return node
+    # print(node)
 
 
+def getAttributeCalumn(header,node):
+    attribute_column = -1
+    for i in range(0, len(header)):
+        if header[i] == node.partition_feature_and_limit[0]:
+            attribute_column = i
+            break
+    return attribute_column
 
 
+def predict(node):
+    true = 0
+    false = 0
+    df = pd.read_csv("test.csv", header=0)
+    data_without_header = df.to_numpy()
 
-#buildTree(df)
+    with open('train.csv', newline='') as f:
+        reader = csv.reader(f)
+        header = next(reader)
+
+    for data_line in data_without_header:
+        if return_prediction_good_or_bad_for_a_line_of_data(header, node, data_line):
+            true += 1
+        else:
+            false += 1
+
+    accuracy = true/len(df)
+    return accuracy
+
+
+def return_prediction_good_or_bad_for_a_line_of_data(header,node, data_line):
+    if node.classification is not None:
+        if data_line[0] == node.classification:
+            return True
+        else:
+            return False
+    else:
+        # there is partition here
+        attribute_column = getAttributeCalumn(header)
+        if data_line[attribute_column] < node.partition_feature_and_limit[1]:
+            return_prediction_good_or_bad_for_a_line_of_data(header, node.left, data_line)  # under limit
+        else:
+            return_prediction_good_or_bad_for_a_line_of_data(header, node.right, data_line)  # above or equal to limit
+
+
+node = fit()
+predict(node)

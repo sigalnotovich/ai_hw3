@@ -59,24 +59,26 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
     entropy_attribute = 0
     for border in borders:
         num_B_smaller_then_border = len([value for value in sorted_values_with_B if value < border])
-        p_B_smaller_then_border = num_B_smaller_then_border / number_of_rows
         num_M_smaller_then_border = len([value for value in sorted_values_with_M if value < border])
-        p_M_smaller_then_border = num_M_smaller_then_border / number_of_rows
-        h_first_sun = -p_B_smaller_then_border * log(p_B_smaller_then_border + eps) \
-                      - p_M_smaller_then_border * log(p_M_smaller_then_border + eps)
+        number_of_rows_smaller_then_border = num_B_smaller_then_border + num_M_smaller_then_border
+        p_B_smaller_then_border = num_B_smaller_then_border / number_of_rows_smaller_then_border
+        p_M_smaller_then_border = num_M_smaller_then_border / number_of_rows_smaller_then_border
+        entropy_first_sun = -p_B_smaller_then_border * np.log2(p_B_smaller_then_border + eps) \
+                      - p_M_smaller_then_border * np.log2(p_M_smaller_then_border + eps)
 
         num_B_bigger_equal_then_border = len([value for value in sorted_values_with_B if value >= border])
-        p_B_bigger_equal_then_border = num_B_bigger_equal_then_border / number_of_rows
         num_M_bigger_equal_then_border = len([value for value in sorted_values_with_M if value >= border])
-        p_M_bigger_equal_then_border = num_M_bigger_equal_then_border / number_of_rows
-        h_second_sun = -p_B_bigger_equal_then_border * log(p_B_bigger_equal_then_border + eps) \
-                       - p_M_bigger_equal_then_border * log(p_M_bigger_equal_then_border + eps)
+        number_of_rows_bigger_equal_then_border = num_B_bigger_equal_then_border + num_M_bigger_equal_then_border
+        p_B_bigger_equal_then_border = num_B_bigger_equal_then_border / number_of_rows_bigger_equal_then_border
+        p_M_bigger_equal_then_border = num_M_bigger_equal_then_border / number_of_rows_bigger_equal_then_border
+        entropy_second_sun = -p_B_bigger_equal_then_border * np.log2(p_B_bigger_equal_then_border + eps) \
+                       - p_M_bigger_equal_then_border * np.log2(p_M_bigger_equal_then_border + eps)
 
         sum_of_smaller_then_border = num_B_smaller_then_border + num_M_smaller_then_border
-        add_to_entropy_first_sun = sum_of_smaller_then_border / number_of_rows * h_first_sun
+        add_to_entropy_first_sun = sum_of_smaller_then_border / number_of_rows * entropy_first_sun
 
         sum_of_bigger_equal_then_border = num_B_bigger_equal_then_border + num_M_bigger_equal_then_border
-        add_to_entropy_second_sun = sum_of_bigger_equal_then_border / number_of_rows * h_second_sun
+        add_to_entropy_second_sun = sum_of_bigger_equal_then_border / number_of_rows * entropy_second_sun
 
         new_entropy = add_to_entropy_first_sun + add_to_entropy_second_sun
         entropy_list.append((new_entropy, attribute, border))
@@ -84,23 +86,15 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
     return entropy_list
 
 
-# def dynamic_division(df, attribute,list_of_values):
-#     borders = lambda list_of_values: [(list_of_values[i] + list_of_values[i + 1]) / 2 for i in range(0, len(list_of_values) - 1)] #todo: is -1 nessesery?
-#
-#
-#     variables = df[attribute].unique()
-#     # sort increaing order with lanbda
-#     variables = sorted(variables, key=lambda x: x, reverse=False)
-#     #print(variables)
-#     borders = lambda lst: [(lst[i] + lst[i + 1])/2 for i in range(0, len(lst) - 1)]
-#     #print(borders(variables))
-#     return borders(variables)
 
 # get the entropy for all the attributes when each attribute devided to borders as we saw in the lecture
-def get_division_options_entropy_list(df):
+def get_best_IG(df, entropy_before_division):
     division_options_entropy_list = []
     number_of_columns_in_file = len(df[1][0])
     list_of_B_and_M = [line[0] for line in df[1]]  # distinct, in order
+    best_IG_dif = 0
+    best_attribute_name = ""
+    best_attribute_limit = 0
 
     # go over all the attributes in file - checked
     for i in range(1, number_of_columns_in_file):
@@ -112,51 +106,20 @@ def get_division_options_entropy_list(df):
                                                                                                     list_of_values_of_attribute_i,
                                                                                                     number_of_columns_in_file,
                                                                                                     list_of_B_and_M)
-        division_options_entropy_list += received_entropy_list_for_an_attribute
-        # print(attribute)
-        # print(list_of_values_of_attribute_i)
 
-    return division_options_entropy_list
+        IG_list_for_attribute = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in received_entropy_list_for_an_attribute]
+        IG_dif, attribute_name, attribute_limit = max(IG_list_for_attribute, key=lambda item: item[0])
+        if IG_dif >= best_IG_dif:
+            best_IG_dif, best_attribute_name, best_attribute_limit = IG_dif, attribute_name, attribute_limit
 
-# def MAX_IG(df,list_of_B_and_M):
-#     entropy_before_division = get_entropy_before_division(df,list_of_B_and_M)
-#
-#     division_options_entropy_list = get_division_options_entropy_list(df)
-#     IG = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in division_options_entropy_list]
-#     #print(IG)
-#     best_entropy_dif, best_attribute_name,  best_attribute_limit = max(IG,key=lambda item: item[0])  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)
-#     return best_entropy_dif, best_attribute_name,  best_attribute_limit  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)?
+    return best_IG_dif, best_attribute_name, best_attribute_limit
 
 def MAX_IG(df,list_of_B_and_M):
     entropy_before_division = get_entropy_before_division(df,list_of_B_and_M)
 
-    division_options_entropy_list = get_division_options_entropy_list(df)
-    IG = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in division_options_entropy_list]
-    #print(IG)
-    best_entropy_dif, best_attribute_name,  best_attribute_limit = max(IG,key=lambda item: item[0])  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)
-    return best_entropy_dif, best_attribute_name,  best_attribute_limit  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)?
+    best_IG_dif, best_attribute_name, best_attribute_limit = get_best_IG(df, entropy_before_division)
+    return best_IG_dif, best_attribute_name, best_attribute_limit #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)?
 
-
-# def MAX_IG(df, list_of_B_and_M):
-#     entropy_before_division = get_entropy_before_division(df, list_of_B_and_M)
-#
-#     division_options_entropy_list = get_division_options_entropy_list(df)
-#     IG = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in
-#           division_options_entropy_list]
-#     # print(IG)
-#     best_entropy_dif, best_attribute_name, best_attribute_limit = max(IG, key=lambda item: item[
-#         0])  # for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)
-#     # take the value with bigest index , if their IG are the same TODO
-#     list_of_best_entropy = [i for i in IG if i[0] == best_entropy_dif]
-#     list_of_best_entropy_with_indexes = [(best_entropy_dif, best_attribute_name, df[0].index(best_attribute_name),
-#                                           best_attribute_limit) for best_entropy_dif, best_attribute_name,
-#                                                                     best_attribute_limit in list_of_best_entropy]
-#     max_attribute_in_list = list_of_best_entropy_with_indexes[len(list_of_best_entropy_with_indexes)-1][2]
-#     list_of_max_attribute_limits = [i for i in list_of_best_entropy_with_indexes if i[2] == max_attribute_in_list]
-#     max_attribute_and_limit = sorted(list_of_max_attribute_limits,key=lambda x: x[3], reverse=True)[0]
-#     #list_of_best_entropy_for_bigest_index_parameter = sorted(list_of_best_entropy_with_indexes,key=lambda x: x[2], reverse=True)
-#     best_entropy_dif, best_attribute_name, _, best_attribute_limit = max_attribute_and_limit
-#     return best_entropy_dif, best_attribute_name, best_attribute_limit  # for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)?
 
 
 def get_subtable_under_and_above_equal_to_limit(df, attribute, limit):
@@ -382,10 +345,12 @@ def return_prediction_good_or_bad_for_a_line_of_data(header, node, data_line):
 
 node = fit()
 accuracy = predict(node)
-printTree(node)
+#printTree(node)
 print(accuracy)
 
-node = fit(100)
-accuracy = predict(node)
-printTree(node)
-print(accuracy)
+for i in range(1,40):
+    node = fit(i)
+    print(i)
+    accuracy = predict(node)
+    #printTree(node)
+    print(accuracy)

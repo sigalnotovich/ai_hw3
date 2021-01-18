@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import csv
+import sklearn.model_selection
 
 eps = np.finfo(float).eps
 from numpy import log2 as log
@@ -280,15 +281,7 @@ def printTree(node, level=0):
 
 # header = np.genfromtxt('train.csv', dtype=float, delimiter=',', names=True)
 
-def fit(early_pruning_parameter = None):
-    df = pd.read_csv("train.csv", header=0)
-    data_without_header = df.to_numpy()
-
-    with open('train.csv', newline='') as f:
-        reader = csv.reader(f)
-        header = next(reader)
-
-    df = (header, data_without_header)
+def fit(df,early_pruning_parameter = None):
     #print(df[0])
     #print(df[1])
     node = Node()
@@ -343,14 +336,60 @@ def return_prediction_good_or_bad_for_a_line_of_data(header, node, data_line):
                                                                     data_line)  # above or equal to limit
 
 
-node = fit()
-accuracy = predict(node)
-#printTree(node)
-print(accuracy)
+def ex1():
+    df = pd.read_csv("train.csv", header=0)
+    data_without_header = df.to_numpy()
 
-for i in range(1,40):
-    node = fit(i)
-    print(i)
+    with open('train.csv', newline='') as f:
+        reader = csv.reader(f)
+        header = next(reader)
+
+    df = (header, data_without_header)
+    node = fit(df)
     accuracy = predict(node)
     #printTree(node)
     print(accuracy)
+
+
+def ex3():
+    df = pd.read_csv("train.csv", header=0)
+    data_without_header = df.to_numpy()
+
+    with open('train.csv', newline='') as f:
+        reader = csv.reader(f)
+        header = next(reader)
+
+    # df = (header, data_without_header)
+    kf = sklearn.model_selection.KFold(n_splits=5, shuffle= True, random_state= 123456789)
+    kf.get_n_splits(data_without_header)
+    train_data = []
+    test_data = []
+    for train_index, test_index in kf.split(data_without_header):
+        for index in train_index:
+            train_data.append(data_without_header[index])
+        for index in test_index:
+            test_data.append(data_without_header[index])
+        df = (header, train_data)
+        node = fit(df)
+        accuracy = predict(node)
+        # printTree(node)
+        print(accuracy)
+
+
+
+
+
+    #print("fin")
+
+
+
+# for i in range(1,40):
+#     node = fit(i)
+#     print(i)
+#     accuracy = predict(node)
+#     #printTree(node)
+#     print(accuracy)
+#ex1 - todo: remove Comment
+ex1()
+#ex3()
+

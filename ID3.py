@@ -118,27 +118,45 @@ def get_division_options_entropy_list(df):
 
     return division_options_entropy_list
 
+# def MAX_IG(df,list_of_B_and_M):
+#     entropy_before_division = get_entropy_before_division(df,list_of_B_and_M)
+#
+#     division_options_entropy_list = get_division_options_entropy_list(df)
+#     IG = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in division_options_entropy_list]
+#     #print(IG)
+#     best_entropy_dif, best_attribute_name,  best_attribute_limit = max(IG,key=lambda item: item[0])  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)
+#     return best_entropy_dif, best_attribute_name,  best_attribute_limit  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)?
 
-def MAX_IG(df, list_of_B_and_M):
-    entropy_before_division = get_entropy_before_division(df, list_of_B_and_M)
+def MAX_IG(df,list_of_B_and_M):
+    entropy_before_division = get_entropy_before_division(df,list_of_B_and_M)
 
     division_options_entropy_list = get_division_options_entropy_list(df)
-    IG = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in
-          division_options_entropy_list]
-    # print(IG)
-    best_entropy_dif, best_attribute_name, best_attribute_limit = max(IG, key=lambda item: item[
-        0])  # for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)
-    # take the value with bigest index , if their IG are the same TODO
-    list_of_best_entropy = [i for i in IG if i[0] == best_entropy_dif]
-    list_of_best_entropy_with_indexes = [(best_entropy_dif, best_attribute_name, df[0].index(best_attribute_name),
-                                          best_attribute_limit) for best_entropy_dif, best_attribute_name,
-                                                                    best_attribute_limit in list_of_best_entropy]
-    max_attribute_in_list = list_of_best_entropy_with_indexes[len(list_of_best_entropy_with_indexes)-1][2]
-    list_of_max_attribute_limits = [i for i in list_of_best_entropy_with_indexes if i[2] == max_attribute_in_list]
-    max_attribute_and_limit = sorted(list_of_max_attribute_limits,key=lambda x: x[3], reverse=True)[0]
-    #list_of_best_entropy_for_bigest_index_parameter = sorted(list_of_best_entropy_with_indexes,key=lambda x: x[2], reverse=True)
-    best_entropy_dif, best_attribute_name, _, best_attribute_limit = max_attribute_and_limit
-    return best_entropy_dif, best_attribute_name, best_attribute_limit  # for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)?
+    IG = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in division_options_entropy_list]
+    #print(IG)
+    best_entropy_dif, best_attribute_name,  best_attribute_limit = max(IG,key=lambda item: item[0])  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)
+    return best_entropy_dif, best_attribute_name,  best_attribute_limit  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)?
+
+
+# def MAX_IG(df, list_of_B_and_M):
+#     entropy_before_division = get_entropy_before_division(df, list_of_B_and_M)
+#
+#     division_options_entropy_list = get_division_options_entropy_list(df)
+#     IG = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in
+#           division_options_entropy_list]
+#     # print(IG)
+#     best_entropy_dif, best_attribute_name, best_attribute_limit = max(IG, key=lambda item: item[
+#         0])  # for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)
+#     # take the value with bigest index , if their IG are the same TODO
+#     list_of_best_entropy = [i for i in IG if i[0] == best_entropy_dif]
+#     list_of_best_entropy_with_indexes = [(best_entropy_dif, best_attribute_name, df[0].index(best_attribute_name),
+#                                           best_attribute_limit) for best_entropy_dif, best_attribute_name,
+#                                                                     best_attribute_limit in list_of_best_entropy]
+#     max_attribute_in_list = list_of_best_entropy_with_indexes[len(list_of_best_entropy_with_indexes)-1][2]
+#     list_of_max_attribute_limits = [i for i in list_of_best_entropy_with_indexes if i[2] == max_attribute_in_list]
+#     max_attribute_and_limit = sorted(list_of_max_attribute_limits,key=lambda x: x[3], reverse=True)[0]
+#     #list_of_best_entropy_for_bigest_index_parameter = sorted(list_of_best_entropy_with_indexes,key=lambda x: x[2], reverse=True)
+#     best_entropy_dif, best_attribute_name, _, best_attribute_limit = max_attribute_and_limit
+#     return best_entropy_dif, best_attribute_name, best_attribute_limit  # for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)?
 
 
 def get_subtable_under_and_above_equal_to_limit(df, attribute, limit):
@@ -226,18 +244,18 @@ def getMajorityClass(list_of_B_and_M):
 
 
 # checked
-def ID3(df, node):
+def ID3(df, node,early_pruning_parameter):
     list_of_B_and_M = [line[0] for line in df[1]]  # todo:maybe pass it to the function - used a lot
     # print(list_of_B_and_M)
     # pd.DataFrame(list_of_B_and_M).to_csv("C:/My Stuff/studies/2021a/AI/hw3/list_of_B_and_M.csv")
 
     majority_class = getMajorityClass(list_of_B_and_M)
 
-    return TDIDT(df, majority_class, MAX_IG, node)
+    return TDIDT(df, majority_class, MAX_IG, node,early_pruning_parameter)
 
 
 # df[0] = heaser of the file, df[1] = all the other data in the file
-def TDIDT(df, majority_class_df_under_limit, MAX_IG, node):  # TDIDT(E, F, Default, SelectFeature)
+def TDIDT(df, majority_class_df_under_limit, MAX_IG, node,early_pruning_parameter):  # TDIDT(E, F, Default, SelectFeature)
     if len(df[1]) == 0:
         node.classification = majority_class_df_under_limit
         return None
@@ -250,6 +268,10 @@ def TDIDT(df, majority_class_df_under_limit, MAX_IG, node):  # TDIDT(E, F, Defau
         node.classification = classification
         return None
 
+    if early_pruning_parameter is not None:
+        if len(df[1]) <= early_pruning_parameter:
+            node.classification = majority_class_df_under_limit
+            return None
     # majority_class = getMajorityClass(list_of_B_and_M) #todo: do i need it here?
 
     # choose best festure and best limit:
@@ -266,12 +288,12 @@ def TDIDT(df, majority_class_df_under_limit, MAX_IG, node):  # TDIDT(E, F, Defau
     node.left = Node()
     list_of_B_and_M_under_limit = [line[0] for line in df_under_limit[1]]
     majority_class_df_under_limit = getMajorityClass(list_of_B_and_M_under_limit)
-    TDIDT(df_under_limit, majority_class_df_under_limit, MAX_IG, node.left)
+    TDIDT(df_under_limit, majority_class_df_under_limit, MAX_IG, node.left,early_pruning_parameter)
 
     node.right = Node()
     list_of_B_and_M_above_equal_to_limit = [line[0] for line in df_above_equal_to_limit[1]]
     majority_above_equal_to_limit = getMajorityClass(list_of_B_and_M_above_equal_to_limit)
-    TDIDT(df_above_equal_to_limit, majority_above_equal_to_limit, MAX_IG, node.right)
+    TDIDT(df_above_equal_to_limit, majority_above_equal_to_limit, MAX_IG, node.right,early_pruning_parameter)
 
     return None
 
@@ -283,10 +305,19 @@ class Node:
         self.partition_feature_and_limit = None
         self.classification = None
 
+def printTree(node, level=0):
+    if node != None:
+        printTree(node.left, level + 1)
+        if node.partition_feature_and_limit is not None:
+            print(' ' * 4 * level + '->', node.partition_feature_and_limit)
+        if node.classification is not None:
+            print(' ' * 4 * level + '->', node.classification)
+        printTree(node.right, level + 1)
+
 
 # header = np.genfromtxt('train.csv', dtype=float, delimiter=',', names=True)
 
-def fit():
+def fit(early_pruning_parameter = None):
     df = pd.read_csv("train.csv", header=0)
     data_without_header = df.to_numpy()
 
@@ -295,10 +326,10 @@ def fit():
         header = next(reader)
 
     df = (header, data_without_header)
-    print(df[0])
-    print(df[1])
+    #print(df[0])
+    #print(df[1])
     node = Node()
-    ID3(df, node)
+    ID3(df, node,early_pruning_parameter)
     return node
     # print(node)
 
@@ -351,4 +382,10 @@ def return_prediction_good_or_bad_for_a_line_of_data(header, node, data_line):
 
 node = fit()
 accuracy = predict(node)
+printTree(node)
+print(accuracy)
+
+node = fit(100)
+accuracy = predict(node)
+printTree(node)
 print(accuracy)

@@ -6,15 +6,14 @@ eps = np.finfo(float).eps
 from numpy import log2 as log
 
 
-
-def get_entropy_before_division(df,list_of_B_and_M):
+def get_entropy_before_division(df, list_of_B_and_M):
     entropy_node = 0
-    #for B:
+    # for B:
     sum_of_values = len(list_of_B_and_M)
     sum_of_B = len([x for x in list_of_B_and_M if x == 'B'])
     sum_of_M = len([x for x in list_of_B_and_M if x == 'M'])
-    fraction_B = sum_of_B/sum_of_values
-    fraction_M = sum_of_M/sum_of_values
+    fraction_B = sum_of_B / sum_of_values
+    fraction_M = sum_of_M / sum_of_values
     entropy_B = -fraction_B * np.log2(fraction_B)
     entropy_M = -fraction_M * np.log2(fraction_M)
     entropy = entropy_B + entropy_M
@@ -24,51 +23,52 @@ def get_entropy_before_division(df,list_of_B_and_M):
 # takes an attribute,looks at its values and devide into borders ,as we saw in the lecture,
 # then add the sum over i to k of |Ei|/|E| * H(Ei) to the entropy_list
 # checked
-def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_list_of_values, len_of_table, list_of_B_and_M):
+def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_list_of_values, len_of_table,
+                                                       list_of_B_and_M):
     entropy_list = []
 
-    #get_borders on sorted values of the attribute: checked
+    # get_borders on sorted values of the attribute: checked
     borders_func = lambda list: [(list[i] + list[i + 1]) / 2 for i in
-                                      range(0, len(list) - 1)]
+                                 range(0, len(list) - 1)]
     list_of_sorted_values = sorted(unsorted_list_of_values, key=lambda x: x, reverse=False)
     list_of_sorted_values_no_duplicates = list(dict.fromkeys(list_of_sorted_values))
     borders = borders_func(list_of_sorted_values_no_duplicates)
-    #print(list_of_values)
-    #print(borders)
+    # print(list_of_values)
+    # print(borders)
 
-    #use unsorted values so that list_of_B_and_M will match the values of the attribute
+    # use unsorted values so that list_of_B_and_M will match the values of the attribute
     unsorted_values_with_B = []
     unsorted_values_with_M = []
-    #get all the values with B: checked
+    # get all the values with B: checked
     for i in range(0, len(unsorted_list_of_values)):
         if list_of_B_and_M[i] == 'B':
             unsorted_values_with_B.append(unsorted_list_of_values[i])
         else:
             unsorted_values_with_M.append(unsorted_list_of_values[i])
-    #print(unsorted_values_with_B)
-    #print(unsorted_values_with_M)
+    # print(unsorted_values_with_B)
+    # print(unsorted_values_with_M)
 
     sorted_values_with_B = sorted(unsorted_values_with_B, key=lambda x: x, reverse=False)
     sorted_values_with_M = sorted(unsorted_values_with_M, key=lambda x: x, reverse=False)
 
-    #print(sorted_values_with_B)
-    #print(sorted_values_with_M)
+    # print(sorted_values_with_B)
+    # print(sorted_values_with_M)
 
     number_of_rows = len(df[1])
-    #borders = dynamic_division(df, attribute,list_of_values)
+    # borders = dynamic_division(df, attribute,list_of_values)
     entropy_attribute = 0
     for border in borders:
         num_B_smaller_then_border = len([value for value in sorted_values_with_B if value < border])
-        p_B_smaller_then_border = num_B_smaller_then_border/number_of_rows
+        p_B_smaller_then_border = num_B_smaller_then_border / number_of_rows
         num_M_smaller_then_border = len([value for value in sorted_values_with_M if value < border])
-        p_M_smaller_then_border = num_M_smaller_then_border/number_of_rows
+        p_M_smaller_then_border = num_M_smaller_then_border / number_of_rows
         h_first_sun = -p_B_smaller_then_border * log(p_B_smaller_then_border + eps) \
                       - p_M_smaller_then_border * log(p_M_smaller_then_border + eps)
 
         num_B_bigger_equal_then_border = len([value for value in sorted_values_with_B if value >= border])
-        p_B_bigger_equal_then_border = num_B_bigger_equal_then_border/number_of_rows
+        p_B_bigger_equal_then_border = num_B_bigger_equal_then_border / number_of_rows
         num_M_bigger_equal_then_border = len([value for value in sorted_values_with_M if value >= border])
-        p_M_bigger_equal_then_border = num_M_bigger_equal_then_border/number_of_rows
+        p_M_bigger_equal_then_border = num_M_bigger_equal_then_border / number_of_rows
         h_second_sun = -p_B_bigger_equal_then_border * log(p_B_bigger_equal_then_border + eps) \
                        - p_M_bigger_equal_then_border * log(p_M_bigger_equal_then_border + eps)
 
@@ -76,7 +76,7 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
         add_to_entropy_first_sun = sum_of_smaller_then_border / number_of_rows * h_first_sun
 
         sum_of_bigger_equal_then_border = num_B_bigger_equal_then_border + num_M_bigger_equal_then_border
-        add_to_entropy_second_sun = sum_of_bigger_equal_then_border/number_of_rows * h_second_sun
+        add_to_entropy_second_sun = sum_of_bigger_equal_then_border / number_of_rows * h_second_sun
 
         new_entropy = add_to_entropy_first_sun + add_to_entropy_second_sun
         entropy_list.append((new_entropy, attribute, border))
@@ -96,38 +96,52 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
 #     #print(borders(variables))
 #     return borders(variables)
 
-#get the entropy for all the attributes when each attribute devided to borders as we saw in the lecture
+# get the entropy for all the attributes when each attribute devided to borders as we saw in the lecture
 def get_division_options_entropy_list(df):
     division_options_entropy_list = []
     number_of_columns_in_file = len(df[1][0])
-    list_of_B_and_M = [line[0] for line in df[1]] #distinct, in order
+    list_of_B_and_M = [line[0] for line in df[1]]  # distinct, in order
 
-#go over all the attributes in file - checked
+    # go over all the attributes in file - checked
     for i in range(1, number_of_columns_in_file):
-        attribute = df[0][i]  #checked
-        #print(attribute)
-        list_of_values_of_attribute_i = [x[i] for x in df[1]] #chcked
-        #print(list_of_values_of_attribute_i)
-        received_entropy_list_for_an_attribute = find_entropy_for_different_divisions_for_attribute(df,attribute,list_of_values_of_attribute_i,number_of_columns_in_file,list_of_B_and_M)
+        attribute = df[0][i]  # checked
+        # print(attribute)
+        list_of_values_of_attribute_i = [x[i] for x in df[1]]  # chcked
+        # print(list_of_values_of_attribute_i)
+        received_entropy_list_for_an_attribute = find_entropy_for_different_divisions_for_attribute(df, attribute,
+                                                                                                    list_of_values_of_attribute_i,
+                                                                                                    number_of_columns_in_file,
+                                                                                                    list_of_B_and_M)
         division_options_entropy_list += received_entropy_list_for_an_attribute
-        #print(attribute)
-        #print(list_of_values_of_attribute_i)
+        # print(attribute)
+        # print(list_of_values_of_attribute_i)
 
     return division_options_entropy_list
 
 
-
-def MAX_IG(df,list_of_B_and_M):
-    entropy_before_division = get_entropy_before_division(df,list_of_B_and_M)
+def MAX_IG(df, list_of_B_and_M):
+    entropy_before_division = get_entropy_before_division(df, list_of_B_and_M)
 
     division_options_entropy_list = get_division_options_entropy_list(df)
-    IG = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in division_options_entropy_list]
-    #print(IG)
-    best_entropy_dif, best_attribute_name,  best_attribute_limit = max(IG,key=lambda item: item[0])  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)
-    return best_entropy_dif, best_attribute_name,  best_attribute_limit  #for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)?
+    IG = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in
+          division_options_entropy_list]
+    # print(IG)
+    best_entropy_dif, best_attribute_name, best_attribute_limit = max(IG, key=lambda item: item[
+        0])  # for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)
+    # take the value with bigest index , if their IG are the same TODO
+    list_of_best_entropy = [i for i in IG if i[0] == best_entropy_dif]
+    list_of_best_entropy_with_indexes = [(best_entropy_dif, best_attribute_name, df[0].index(best_attribute_name),
+                                          best_attribute_limit) for best_entropy_dif, best_attribute_name,
+                                                                    best_attribute_limit in list_of_best_entropy]
+    max_attribute_in_list = list_of_best_entropy_with_indexes[len(list_of_best_entropy_with_indexes)-1][2]
+    list_of_max_attribute_limits = [i for i in list_of_best_entropy_with_indexes if i[2] == max_attribute_in_list]
+    max_attribute_and_limit = sorted(list_of_max_attribute_limits,key=lambda x: x[3], reverse=True)[0]
+    #list_of_best_entropy_for_bigest_index_parameter = sorted(list_of_best_entropy_with_indexes,key=lambda x: x[2], reverse=True)
+    best_entropy_dif, best_attribute_name, _, best_attribute_limit = max_attribute_and_limit
+    return best_entropy_dif, best_attribute_name, best_attribute_limit  # for ex. (0.9457760422765744, 'fractal_dimension_mean', 0.050245)?
 
 
-def get_subtable_under_and_above_equal_to_limit(df,attribute, limit):
+def get_subtable_under_and_above_equal_to_limit(df, attribute, limit):
     subtable_under_limit = []
     subtable_above_equal_to_limit = []
     attribute_column = -1
@@ -142,11 +156,12 @@ def get_subtable_under_and_above_equal_to_limit(df,attribute, limit):
         else:
             subtable_above_equal_to_limit.append(j)
 
-    df_under_limit = (df[0],subtable_under_limit)
-    df_above_equal_to_limit = (df[0],subtable_above_equal_to_limit)
-    #print(df_under_limit[1][3])
-    #print(df_above_equal_to_limit[1][3])
-    return df_under_limit , df_above_equal_to_limit
+    df_under_limit = (df[0], subtable_under_limit)
+    df_above_equal_to_limit = (df[0], subtable_above_equal_to_limit)
+    # print(df_under_limit[1][3])
+    # print(df_above_equal_to_limit[1][3])
+    return df_under_limit, df_above_equal_to_limit
+
 
 # def get_subtable_under_limit(df, attribute, limit):
 #     return df[df[attribute] < limit].reset_index(drop=True)
@@ -154,7 +169,6 @@ def get_subtable_under_and_above_equal_to_limit(df,attribute, limit):
 #
 # def get_subtable_above_equal_limit(df, attribute, limit):
 #     return df[df[attribute] >= limit].reset_index(drop=True)
-
 
 
 # def buildTree(df, tree=None):
@@ -201,7 +215,7 @@ def get_subtable_under_and_above_equal_to_limit(df,attribute, limit):
 #
 #     return tree
 
-#checked
+# checked
 def getMajorityClass(list_of_B_and_M):
     number_of_B = list_of_B_and_M.count('B')
     number_of_M = list_of_B_and_M.count('M')
@@ -210,19 +224,20 @@ def getMajorityClass(list_of_B_and_M):
     else:
         return 'M'
 
-#checked
-def ID3(df,node):
 
-    list_of_B_and_M = [line[0] for line in df[1]]  #todo:maybe pass it to the function - used a lot
-    #print(list_of_B_and_M)
-    #pd.DataFrame(list_of_B_and_M).to_csv("C:/My Stuff/studies/2021a/AI/hw3/list_of_B_and_M.csv")
+# checked
+def ID3(df, node):
+    list_of_B_and_M = [line[0] for line in df[1]]  # todo:maybe pass it to the function - used a lot
+    # print(list_of_B_and_M)
+    # pd.DataFrame(list_of_B_and_M).to_csv("C:/My Stuff/studies/2021a/AI/hw3/list_of_B_and_M.csv")
 
     majority_class = getMajorityClass(list_of_B_and_M)
 
-    return TDIDT(df,majority_class,MAX_IG,node)
+    return TDIDT(df, majority_class, MAX_IG, node)
 
-#df[0] = heaser of the file, df[1] = all the other data in the file
-def TDIDT(df, majority_class_df_under_limit, MAX_IG, node):  #TDIDT(E, F, Default, SelectFeature)
+
+# df[0] = heaser of the file, df[1] = all the other data in the file
+def TDIDT(df, majority_class_df_under_limit, MAX_IG, node):  # TDIDT(E, F, Default, SelectFeature)
     if len(df[1]) == 0:
         node.classification = majority_class_df_under_limit
         return None
@@ -230,7 +245,7 @@ def TDIDT(df, majority_class_df_under_limit, MAX_IG, node):  #TDIDT(E, F, Defaul
     list_of_B_and_M = [line[0] for line in df[1]]
 
     B_M_or_both = set(list_of_B_and_M)
-    if len(B_M_or_both) == 1 : #only B or only M
+    if len(B_M_or_both) == 1:  # only B or only M
         classification = B_M_or_both.pop()
         node.classification = classification
         return None
@@ -238,13 +253,14 @@ def TDIDT(df, majority_class_df_under_limit, MAX_IG, node):  #TDIDT(E, F, Defaul
     # majority_class = getMajorityClass(list_of_B_and_M) #todo: do i need it here?
 
     # choose best festure and best limit:
-    best_entropy_dif, best_attribute_name, best_attribute_limit = MAX_IG(df,list_of_B_and_M)
+    best_entropy_dif, best_attribute_name, best_attribute_limit = MAX_IG(df, list_of_B_and_M)
     # save at node the best attribute and limit for it
     node.partition_feature_and_limit = (best_attribute_name, best_attribute_limit)
 
-    df_under_limit, df_above_equal_to_limit = get_subtable_under_and_above_equal_to_limit(df, best_attribute_name, best_attribute_limit)
-    #pd.DataFrame(df_under_limit[1]).to_csv("C:/My Stuff/studies/2021a/AI/hw3/df_under_limit.csv")
-    #pd.DataFrame(df_above_equal_to_limit[1]).to_csv("C:/My Stuff/studies/2021a/AI/hw3/df_above_equal_to_limit.csv")
+    df_under_limit, df_above_equal_to_limit = get_subtable_under_and_above_equal_to_limit(df, best_attribute_name,
+                                                                                          best_attribute_limit)
+    # pd.DataFrame(df_under_limit[1]).to_csv("C:/My Stuff/studies/2021a/AI/hw3/df_under_limit.csv")
+    # pd.DataFrame(df_above_equal_to_limit[1]).to_csv("C:/My Stuff/studies/2021a/AI/hw3/df_above_equal_to_limit.csv")
 
     # construct left and right node
     node.left = Node()
@@ -258,6 +274,7 @@ def TDIDT(df, majority_class_df_under_limit, MAX_IG, node):  #TDIDT(E, F, Defaul
     TDIDT(df_above_equal_to_limit, majority_above_equal_to_limit, MAX_IG, node.right)
 
     return None
+
 
 class Node:
     def __init__(self):
@@ -274,8 +291,8 @@ def fit():
     data_without_header = df.to_numpy()
 
     with open('train.csv', newline='') as f:
-      reader = csv.reader(f)
-      header = next(reader)
+        reader = csv.reader(f)
+        header = next(reader)
 
     df = (header, data_without_header)
     print(df[0])
@@ -285,8 +302,9 @@ def fit():
     return node
     # print(node)
 
+
 # checked
-def getAttributeCalumn(header,node):
+def getAttributeCalumn(header, node):
     attribute_column = -1
     for i in range(0, len(header)):
         if header[i] == node.partition_feature_and_limit[0]:
@@ -311,11 +329,11 @@ def predict(node):
         else:
             false += 1
 
-    accuracy = true/len(df)
+    accuracy = true / len(df)
     return accuracy
 
 
-def return_prediction_good_or_bad_for_a_line_of_data(header,node, data_line):
+def return_prediction_good_or_bad_for_a_line_of_data(header, node, data_line):
     if node.classification is not None:
         if data_line[0] == node.classification:
             return True
@@ -323,12 +341,14 @@ def return_prediction_good_or_bad_for_a_line_of_data(header,node, data_line):
             return False
     else:
         # there is partition here
-        attribute_column = getAttributeCalumn(header,node)
+        attribute_column = getAttributeCalumn(header, node)
         if data_line[attribute_column] < node.partition_feature_and_limit[1]:
             return return_prediction_good_or_bad_for_a_line_of_data(header, node.left, data_line)  # under limit
         else:
-            return return_prediction_good_or_bad_for_a_line_of_data(header, node.right, data_line)  # above or equal to limit
+            return return_prediction_good_or_bad_for_a_line_of_data(header, node.right,
+                                                                    data_line)  # above or equal to limit
 
 
 node = fit()
-predict(node)
+accuracy = predict(node)
+print(accuracy)

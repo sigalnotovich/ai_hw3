@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import csv
 import sklearn.model_selection
+import matplotlib.pyplot as plt
 
 eps = np.finfo(float).eps
 from numpy import log2 as log
@@ -365,7 +366,7 @@ def ex1():
     print(accuracy)
 
 
-def ex3(early_pruning_parameter):
+def ex3_k_fold_testing_and_tarining_on_train_csv(early_pruning_parameter):
     df = pd.read_csv("train.csv", header=0)
     data_without_header = df.to_numpy()
 
@@ -375,7 +376,7 @@ def ex3(early_pruning_parameter):
 
     # df = (header, data_without_header)
     n_splits = 5
-    kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=123456789)
+    kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=311342422)
     kf.get_n_splits(data_without_header)
     accuracy_sum = 0
     for train_index, test_index in kf.split(data_without_header):
@@ -394,14 +395,24 @@ def ex3(early_pruning_parameter):
         #print(accuracy)
         accuracy_sum += accuracy
     accuracy_mean = accuracy_sum/n_splits
-    print(accuracy_mean)
+    return accuracy_mean
+    #print(accuracy_mean)
 
 
+def experiment():
+    res_arr = []
+    M = [2, 16, 40, 120, 300]
+    for i in M:
+        #print("ex3 run with m = ", i)
+        res = ex3_k_fold_testing_and_tarining_on_train_csv(i)
+        res_arr.append(res)
+    plt.plot(M, res_arr)
+    # naming the x axis
+    plt.xlabel('M')
+    # naming the y axis
+    plt.ylabel('accuracy')
+    plt.show()
 
-
-
-
-    #print("fin")
 
 
 
@@ -411,15 +422,13 @@ def ex3(early_pruning_parameter):
 #     accuracy = predict(node)
 #     #printTree(node)
 #     print(accuracy)
-#ex1 - todo: remove Comment
-#ex1()
-M =[1, 2, 3, 5, 8, 16, 30, 50, 80, 120]
-for i in M:
-    print("ex3 run with m = ", i)
-    ex3(i)
 
-#M=[2,16,40,120,300]
+#M = [1, 2, 3, 5, 8, 16, 30, 50, 80, 120]
+#for i in M:
+#    print("ex3 run with m = ", i)
+#    ex3(i)
 
-#ex3()
-#ex3(40)
-# ex3(2)
+
+ex1()
+experiment()
+

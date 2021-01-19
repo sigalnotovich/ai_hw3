@@ -300,23 +300,18 @@ def getAttributeCalumn(header, node):
     return attribute_column
 
 
-def predict(node):
+def predict(df,node):
     true = 0
     false = 0
-    df = pd.read_csv("test.csv", header=0)
-    data_without_header = df.to_numpy()
 
-    with open('test.csv', newline='') as f:
-        reader = csv.reader(f)
-        header = next(reader)
-
+    header, data_without_header = df
     for data_line in data_without_header:
         if return_prediction_good_or_bad_for_a_line_of_data(header, node, data_line):
             true += 1
         else:
             false += 1
 
-    accuracy = true / len(df)
+    accuracy = true / len(data_without_header)
     return accuracy
 
 
@@ -346,12 +341,20 @@ def ex1():
 
     df = (header, data_without_header)
     node = fit(df)
-    accuracy = predict(node)
+
+    df_test = pd.read_csv("test.csv", header=0)
+    test_data_without_header = df_test.to_numpy()
+
+    with open('test.csv', newline='') as t:
+        reader = csv.reader(t)
+        test_header = next(reader)
+    test_df = (test_header, test_data_without_header)
+    accuracy = predict(test_df,node)
     #printTree(node)
     print(accuracy)
 
 
-def ex3():
+def ex3(early_pruning_parameter):
     df = pd.read_csv("train.csv", header=0)
     data_without_header = df.to_numpy()
 
@@ -360,20 +363,26 @@ def ex3():
         header = next(reader)
 
     # df = (header, data_without_header)
-    kf = sklearn.model_selection.KFold(n_splits=5, shuffle= True, random_state= 123456789)
+    n_splits = 5
+    kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=123456789)
     kf.get_n_splits(data_without_header)
     train_data = []
     test_data = []
+    accuracy_sum = 0
     for train_index, test_index in kf.split(data_without_header):
         for index in train_index:
             train_data.append(data_without_header[index])
         for index in test_index:
             test_data.append(data_without_header[index])
-        df = (header, train_data)
-        node = fit(df)
-        accuracy = predict(node)
-        # printTree(node)
+        df_train = (header, train_data)
+        node = fit(df_train)
+        df_test = (header, test_data)
+        accuracy = predict(df_test, node)
         print(accuracy)
+        accuracy_sum += accuracy
+    accuracy_mean = accuracy_sum/n_splits
+    print(accuracy_mean)
+
 
 
 
@@ -390,6 +399,6 @@ def ex3():
 #     #printTree(node)
 #     print(accuracy)
 #ex1 - todo: remove Comment
-ex1()
-#ex3()
+#ex1()
+ex3(1)
 

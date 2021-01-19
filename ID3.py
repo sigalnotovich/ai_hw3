@@ -233,6 +233,7 @@ def TDIDT(df, majority_class_df_under_limit, MAX_IG, node,early_pruning_paramete
         return None
 
     if early_pruning_parameter is not None:
+        len_df1 = len(df[1])
         if len(df[1]) <= early_pruning_parameter:
             node.classification = majority_class_df_under_limit
             return None
@@ -281,12 +282,12 @@ def printTree(node, level=0):
 
 # header = np.genfromtxt('train.csv', dtype=float, delimiter=',', names=True)
 
-def fit(df,early_pruning_parameter = None):
+def fit(df, node, early_pruning_parameter = None):
     #print(df[0])
     #print(df[1])
-    node = Node()
+
     ID3(df, node,early_pruning_parameter)
-    return node
+
     # print(node)
 
 
@@ -300,7 +301,7 @@ def getAttributeCalumn(header, node):
     return attribute_column
 
 
-def predict(df,node):
+def predict(df, node):
     true = 0
     false = 0
 
@@ -340,7 +341,8 @@ def ex1():
         header = next(reader)
 
     df = (header, data_without_header)
-    node = fit(df)
+    node = Node()
+    fit(df, node)
 
     df_test = pd.read_csv("test.csv", header=0)
     test_data_without_header = df_test.to_numpy()
@@ -349,6 +351,7 @@ def ex1():
         reader = csv.reader(t)
         test_header = next(reader)
     test_df = (test_header, test_data_without_header)
+
     accuracy = predict(test_df,node)
     #printTree(node)
     print(accuracy)
@@ -366,16 +369,18 @@ def ex3(early_pruning_parameter):
     n_splits = 5
     kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=123456789)
     kf.get_n_splits(data_without_header)
-    train_data = []
-    test_data = []
     accuracy_sum = 0
     for train_index, test_index in kf.split(data_without_header):
+        train_data = []
+        test_data = []
         for index in train_index:
             train_data.append(data_without_header[index])
         for index in test_index:
             test_data.append(data_without_header[index])
         df_train = (header, train_data)
-        node = fit(df_train)
+        node = Node()
+        fit(df_train, node, early_pruning_parameter)
+        printTree(node)
         df_test = (header, test_data)
         accuracy = predict(df_test, node)
         print(accuracy)
@@ -400,5 +405,5 @@ def ex3(early_pruning_parameter):
 #     print(accuracy)
 #ex1 - todo: remove Comment
 #ex1()
-ex3(1)
+ex3(120)
 

@@ -201,10 +201,10 @@ def get_subtable_under_and_above_equal_to_limit(df, attribute, limit):
 def getMajorityClass(list_of_B_and_M):
     number_of_B = list_of_B_and_M.count('B')
     number_of_M = list_of_B_and_M.count('M')
-    if number_of_B > number_of_M:
-        return 'B'
-    else:
+    if number_of_M > number_of_B:
         return 'M'
+    else:
+        return 'B'
 
 
 # checked
@@ -219,9 +219,9 @@ def ID3(df, node,early_pruning_parameter):
 
 
 # df[0] = heaser of the file, df[1] = all the other data in the file
-def TDIDT(df, majority_class_df_under_limit, MAX_IG, node,early_pruning_parameter):  # TDIDT(E, F, Default, SelectFeature)
+def TDIDT(df, majority_class_df, MAX_IG, node,early_pruning_parameter):  # TDIDT(E, F, Default, SelectFeature)
     if len(df[1]) == 0:
-        node.classification = majority_class_df_under_limit
+        node.classification = majority_class_df
         return None
 
     list_of_B_and_M = [line[0] for line in df[1]]
@@ -232,11 +232,11 @@ def TDIDT(df, majority_class_df_under_limit, MAX_IG, node,early_pruning_paramete
         node.classification = classification
         return None
 
-    if early_pruning_parameter is not None:
-        len_df1 = len(df[1])
-        if len(df[1]) <= early_pruning_parameter:
-            node.classification = majority_class_df_under_limit
-            return None
+    # if early_pruning_parameter is not None:
+    #     len_df1 = len(df[1])
+    #     if len(df[1]) <= early_pruning_parameter:
+    #         node.classification = majority_class_df
+    #         return None
     # majority_class = getMajorityClass(list_of_B_and_M) #todo: do i need it here?
 
     # choose best festure and best limit:
@@ -253,12 +253,22 @@ def TDIDT(df, majority_class_df_under_limit, MAX_IG, node,early_pruning_paramete
     node.left = Node()
     list_of_B_and_M_under_limit = [line[0] for line in df_under_limit[1]]
     majority_class_df_under_limit = getMajorityClass(list_of_B_and_M_under_limit)
-    TDIDT(df_under_limit, majority_class_df_under_limit, MAX_IG, node.left,early_pruning_parameter)
+
+    if early_pruning_parameter is not None and len(df_under_limit[1]) <= early_pruning_parameter:
+        node.left.classification = majority_class_df  #fathers majority class
+        return None
+    else:
+        TDIDT(df_under_limit, majority_class_df_under_limit, MAX_IG, node.left, early_pruning_parameter)
 
     node.right = Node()
     list_of_B_and_M_above_equal_to_limit = [line[0] for line in df_above_equal_to_limit[1]]
     majority_above_equal_to_limit = getMajorityClass(list_of_B_and_M_above_equal_to_limit)
-    TDIDT(df_above_equal_to_limit, majority_above_equal_to_limit, MAX_IG, node.right,early_pruning_parameter)
+
+    if early_pruning_parameter is not None and len(df_above_equal_to_limit[1]) <= early_pruning_parameter:
+        node.right.classification = majority_class_df
+        return None
+    else:
+        TDIDT(df_above_equal_to_limit, majority_above_equal_to_limit, MAX_IG, node.right,early_pruning_parameter)
 
     return None
 
@@ -404,6 +414,6 @@ def ex3(early_pruning_parameter):
 #     #printTree(node)
 #     print(accuracy)
 #ex1 - todo: remove Comment
-#ex1()
+ex1()
 ex3(120)
 

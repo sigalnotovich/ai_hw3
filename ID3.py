@@ -254,9 +254,8 @@ def TDIDT(df, majority_class_df, MAX_IG, node,early_pruning_parameter):  # TDIDT
     list_of_B_and_M_under_limit = [line[0] for line in df_under_limit[1]]
     majority_class_df_under_limit = getMajorityClass(list_of_B_and_M_under_limit)
 
-    if early_pruning_parameter is not None and len(df_under_limit[1]) <= early_pruning_parameter:
+    if early_pruning_parameter is not None and len(df_under_limit[1]) < early_pruning_parameter:
         node.left.classification = majority_class_df  #fathers majority class
-        return None
     else:
         TDIDT(df_under_limit, majority_class_df_under_limit, MAX_IG, node.left, early_pruning_parameter)
 
@@ -264,9 +263,8 @@ def TDIDT(df, majority_class_df, MAX_IG, node,early_pruning_parameter):  # TDIDT
     list_of_B_and_M_above_equal_to_limit = [line[0] for line in df_above_equal_to_limit[1]]
     majority_above_equal_to_limit = getMajorityClass(list_of_B_and_M_above_equal_to_limit)
 
-    if early_pruning_parameter is not None and len(df_above_equal_to_limit[1]) <= early_pruning_parameter:
+    if early_pruning_parameter is not None and len(df_above_equal_to_limit[1]) < early_pruning_parameter:
         node.right.classification = majority_class_df
-        return None
     else:
         TDIDT(df_above_equal_to_limit, majority_above_equal_to_limit, MAX_IG, node.right,early_pruning_parameter)
 
@@ -390,10 +388,10 @@ def ex3(early_pruning_parameter):
         df_train = (header, train_data)
         node = Node()
         fit(df_train, node, early_pruning_parameter)
-        printTree(node)
+        #printTree(node)
         df_test = (header, test_data)
         accuracy = predict(df_test, node)
-        print(accuracy)
+        #print(accuracy)
         accuracy_sum += accuracy
     accuracy_mean = accuracy_sum/n_splits
     print(accuracy_mean)
@@ -414,6 +412,14 @@ def ex3(early_pruning_parameter):
 #     #printTree(node)
 #     print(accuracy)
 #ex1 - todo: remove Comment
-ex1()
-ex3(120)
+#ex1()
+M =[1, 2, 3, 5, 8, 16, 30, 50, 80, 120]
+for i in M:
+    print("ex3 run with m = ", i)
+    ex3(i)
 
+#M=[2,16,40,120,300]
+
+#ex3()
+#ex3(40)
+# ex3(2)

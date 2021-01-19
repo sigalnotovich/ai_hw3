@@ -363,10 +363,10 @@ def ex1():
 
     accuracy = predict(test_df,node)
     #printTree(node)
-    print(accuracy)
+    print(accuracy) #todo: check this is not commented
 
 
-def ex3_k_fold_testing_and_tarining_on_train_csv(early_pruning_parameter):
+def ex3_3(early_pruning_parameter):
     df = pd.read_csv("train.csv", header=0)
     data_without_header = df.to_numpy()
 
@@ -376,7 +376,7 @@ def ex3_k_fold_testing_and_tarining_on_train_csv(early_pruning_parameter):
 
     # df = (header, data_without_header)
     n_splits = 5
-    kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=311342422)
+    kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=311342422) #todo: check id is : 311342422
     kf.get_n_splits(data_without_header)
     accuracy_sum = 0
     for train_index, test_index in kf.split(data_without_header):
@@ -395,8 +395,9 @@ def ex3_k_fold_testing_and_tarining_on_train_csv(early_pruning_parameter):
         #print(accuracy)
         accuracy_sum += accuracy
     accuracy_mean = accuracy_sum/n_splits
-    return accuracy_mean
     #print(accuracy_mean)
+    return accuracy_mean
+
 
 
 def experiment():
@@ -404,7 +405,7 @@ def experiment():
     M = [2, 16, 40, 120, 300]
     for i in M:
         #print("ex3 run with m = ", i)
-        res = ex3_k_fold_testing_and_tarining_on_train_csv(i)
+        res = ex3_3(i)
         res_arr.append(res)
     plt.plot(M, res_arr)
     # naming the x axis
@@ -414,6 +415,30 @@ def experiment():
     plt.show()
 
 
+def ex3_4(early_pruning_parameter):
+    df = pd.read_csv("train.csv", header=0)
+    data_without_header = df.to_numpy()
+
+    with open('train.csv', newline='') as f:
+        reader = csv.reader(f)
+        header = next(reader)
+
+    df = (header, data_without_header)
+    node = Node()
+    #todo: change early_pruning_parameter to 2:
+    fit(df, node, early_pruning_parameter)
+
+    df_test = pd.read_csv("test.csv", header=0)
+    test_data_without_header = df_test.to_numpy()
+
+    with open('test.csv', newline='') as t:
+        reader = csv.reader(t)
+        test_header = next(reader)
+    test_df = (test_header, test_data_without_header)
+
+    accuracy = predict(test_df, node)
+    # printTree(node)
+    print(accuracy)
 
 
 # for i in range(1,40):
@@ -423,12 +448,66 @@ def experiment():
 #     #printTree(node)
 #     print(accuracy)
 
-#M = [1, 2, 3, 5, 8, 16, 30, 50, 80, 120]
-#for i in M:
+# M = [1, 2, 3, 5, 8, 16, 30, 50, 80, 120]
+# for i in M:
 #    print("ex3 run with m = ", i)
-#    ex3(i)
+#    ex3_3(i)
+
+# for interest - check the accuracy when training on all the train.csv and check on the test.csv
+# M = [2, 16, 40, 120, 300]
+# for i in M:
+#    print("ex3 run with m = ", i)
+#    ex3_4(i)
+#B- health , M - sick
+#FP = is B ,but classified as M
+#FN = is M, but classified as B
+def predict_check_lose(df,node):
+    FP = 0
+    FN = 0
+    header, data_without_header = df
+    for data_line in data_without_header:
+        if not return_prediction_good_or_bad_for_a_line_of_data(header, node, data_line):
+            if data_line[0] == 'B':  #is B ,but classified as M
+                FP += 1
+            if data_line[0] == 'M': #is M, but classified as B
+                FN += 1
+
+    loss = (0.1*FP + FN)/len(df[1])
+    return loss
 
 
-ex1()
-experiment()
+def ex4_1(early_pruning_parameter): # copy of 3.4 with predict function changed to loss function
+    df = pd.read_csv("train.csv", header=0)
+    data_without_header = df.to_numpy()
 
+    with open('train.csv', newline='') as f:
+        reader = csv.reader(f)
+        header = next(reader)
+
+    df = (header, data_without_header)
+    node = Node()
+    #todo: change early_pruning_parameter to 2:
+    fit(df, node, early_pruning_parameter)
+
+    df_test = pd.read_csv("test.csv", header=0)
+    test_data_without_header = df_test.to_numpy()
+
+    with open('test.csv', newline='') as t:
+        reader = csv.reader(t)
+        test_header = next(reader)
+    test_df = (test_header, test_data_without_header)
+
+    loss = predict_check_lose(test_df, node)
+    return loss
+    # printTree(node)
+    #print(loss)
+
+#submit:
+#ex1()  #todo: check this is not commented
+# to run the experiment just remove the comment sign(#)
+#experiment() #todo: check this is do commented
+#ex3_4(2) #todo: check this is do commented
+
+
+loss = ex4_1(2)
+print(loss)

@@ -2,18 +2,20 @@
 
 #choose n*p(p is a parameter) for the training set:
 import csv
+
+import numpy as np
 import pandas as pd
 import random
 
-from ID3 import Node, fit
+from ID3 import Node, fit, getAttributeCalumn, getMajorityClass
+
 
 #todo : normalize the centroid so that the distance in the classification will be from all the vectore
-def get_centroid(df,random_data):
+def get_centroid(df,random_data): #the centroid will have only the features in its vector
     pd.DataFrame(random_data).to_csv("C:/My Stuff/studies/2021a/AI/hw3/random_data.csv")
     number_of_features = len(df[0])
     len_of_random_data = len(random_data)
     feature_average_array = []
-    feature_average_array.append(' ')  # for the first feature of the diagnosis - so it will be organized
     for feature_place in range(1, number_of_features):  # for each feature #the first feature is diagnostic so i give it out
         sum_for_feature = 0
         for i in random_data:
@@ -24,8 +26,21 @@ def get_centroid(df,random_data):
     return feature_average_array
 
 
+def getClassification(node,line_to_classify,header):
+    if node.classification is not None:
+        return node.classification
+    else:
+        # there is partition here
+        attribute_column = getAttributeCalumn(header, node)
+        if line_to_classify[attribute_column] < node.partition_feature_and_limit[1]:
+            return getClassification(header, node.left, line_to_classify)  # under limit
+        else:
+            return getClassification(header, node.right,line_to_classify)  # above or equal to limit
 
-def choose_number_of_examples_for_training(p,number_of_trees_N):
+
+def choose_number_of_examples_for_training(p,number_of_trees_N,k):
+    true = 0
+    false = 0
     df = pd.read_csv("train.csv", header=0)
     data_without_header = df.to_numpy()
 
@@ -42,16 +57,41 @@ def choose_number_of_examples_for_training(p,number_of_trees_N):
         df = (header, random_data)
         centroid = get_centroid(df,random_data)
         node = Node()
-        fit(df, node) #fit = algorithm ID3 thet used in ID3.py
+        fit(df, node) #fit = algorithm ID3 thet used in ID3.py  #no pruning todo: maybe change to with pruning
         tree_array.append(node, centroid)
-    # now that i have all the trees :
-    # choose the k nearest trees to the centorid :
-    # for each tree check the right answer
-    # then take the answer the most give
-    # check if it is the right answer - then do it for all the examples in the test.csv to check the accuracy
+
+    #check the classification of examples in test.csv:
+    df_test = pd.read_csv("test.csv", header=0)
+    test_data_without_header = df.to_numpy()
+
+    df_test = (header, test_data_without_header)
+    tree_dist_arr = []
+    for line_to_classify in df_test :
+        line_to_classify.pop(0) #todo: test it removes the first element
+        for tree, centroid in tree_array:
+            dist = np.linalg.norm(line_to_classify - centroid)
+            tree_dist_arr.append(dist, tree)
+        #sort from the smallest to bigest dist:
+        trees_sorted_by_dist = sorted(tree_dist_arr, key=lambda tup: tup[0])
+        topKtrees = trees_sorted_by_dist[:k]
+        k_classification_array = []
+        for tree in topKtrees:
+            classification = getClassification(tree,line_to_classify,header)
+            k_classification_array.append(classification)
+        majority_classification = getMajorityClass(k_classification_array)
+        if line_to_classify[0] == majority_classification:
+            true += 1
+        else:
+            false += 1
+
+        accuracy = true / len(test_data_without_header)
+        return accuracy
+        #chose the most classification
+        #check if it is the correct one
+
 
 
 
 p = 0.3 #is number of exmaples will be choosen from all the examples for each Tree
 number_of_trees_N = 5 #number of trees
-choose_number_of_examples_for_training(p,number_of_trees_N) #todo: train on p from 0.3 to 0.7
+choose_number_of_examples_for_training(p,number_of_trees_N,2) #todo: train on p from 0.3 to 0.7

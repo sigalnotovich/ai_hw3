@@ -9,6 +9,13 @@ import random
 
 from ID3 import Node, fit, getAttributeCalumn, getMajorityClass
 
+#todo: check
+def get_euclidean_dist(vec1,vec2):
+    sum = 0
+    for i,j in zip(vec1,vec2):
+        sum += pow(i-j,2)
+    return np.math.sqrt(sum)
+
 
 #todo : normalize the centroid so that the distance in the classification will be from all the vectore
 def get_centroid(df,random_data): #the centroid will have only the features in its vector
@@ -38,7 +45,7 @@ def getClassification(node,line_to_classify,header):
             return getClassification(header, node.right,line_to_classify)  # above or equal to limit
 
 
-def choose_number_of_examples_for_training(p,number_of_trees_N,k):
+def KNN(p, number_of_trees_N, k):
     true = 0
     false = 0
     df = pd.read_csv("train.csv", header=0)
@@ -58,19 +65,20 @@ def choose_number_of_examples_for_training(p,number_of_trees_N,k):
         centroid = get_centroid(df,random_data)
         node = Node()
         fit(df, node) #fit = algorithm ID3 thet used in ID3.py  #no pruning todo: maybe change to with pruning
-        tree_array.append(node, centroid)
+        tree_array.append((node, centroid))
 
     #check the classification of examples in test.csv:
     df_test = pd.read_csv("test.csv", header=0)
-    test_data_without_header = df.to_numpy()
+    test_data_without_header = df_test.to_numpy()
 
     df_test = (header, test_data_without_header)
     tree_dist_arr = []
-    for line_to_classify in df_test :
+    for line_to_classify in test_data_without_header:
         line_to_classify.pop(0) #todo: test it removes the first element
         for tree, centroid in tree_array:
-            dist = np.linalg.norm(line_to_classify - centroid)
-            tree_dist_arr.append(dist, tree)
+            euclidean_dist = get_euclidean_dist(line_to_classify, centroid)
+            #dist = np.linalg.norm(line_to_classify - centroid)
+            tree_dist_arr.append(euclidean_dist, tree)
         #sort from the smallest to bigest dist:
         trees_sorted_by_dist = sorted(tree_dist_arr, key=lambda tup: tup[0])
         topKtrees = trees_sorted_by_dist[:k]
@@ -94,4 +102,4 @@ def choose_number_of_examples_for_training(p,number_of_trees_N,k):
 
 p = 0.3 #is number of exmaples will be choosen from all the examples for each Tree
 number_of_trees_N = 5 #number of trees
-choose_number_of_examples_for_training(p,number_of_trees_N,2) #todo: train on p from 0.3 to 0.7
+KNN(p, number_of_trees_N, 2) #todo: train on p from 0.3 to 0.7

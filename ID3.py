@@ -216,7 +216,8 @@ def ID3(df, node,early_pruning_parameter):
 
     majority_class = getMajorityClass(list_of_B_and_M)
 
-    return TDIDT(df, majority_class, MAX_IG, node,early_pruning_parameter)
+    return TDIDT(df, majority_class, MAX_IG, node, early_pruning_parameter)
+
 
 
 # df[0] = heaser of the file, df[1] = all the other data in the file

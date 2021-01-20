@@ -355,7 +355,7 @@ def learn_and_test_no_pruning(predict_or_loss): #ex1
     df = (header, data_without_header)
     node = Node()
     fit(df, node)
-
+    #printTree(node)
     df_test = pd.read_csv("test.csv", header=0)
     test_data_without_header = df_test.to_numpy()
 

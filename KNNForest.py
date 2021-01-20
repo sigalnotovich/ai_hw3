@@ -2,7 +2,7 @@
 
 #choose n*p(p is a parameter) for the training set:
 import csv
-
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import random
@@ -139,8 +139,50 @@ def get_euclidean_dist(vec1,vec2):
 # print("fin")
 
 
-p = 1 #is number of exmaples will be choosen from all the examples for each Tree
-number_of_trees_in_comity_N = 1 #number of trees
-number_of_trees_to_classify_by_K = 1
-accuracy = KNN(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
-print(accuracy)
+#checked with 1 1 1
+# p = 0.7 #is number of exmaples will be choosen from all the examples for each Tree
+# number_of_trees_in_comity_N = 20 #number of trees
+# number_of_trees_to_classify_by_K = 1
+# accuracy = KNN(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
+# print(accuracy)
+
+
+## graphs:
+array = [0.3, 0.4, 0.5, 0.6, 0.7]
+number_of_trees_in_comity_N = 5  # number of trees# 20 is also okay
+greatest_accuracy = 0
+for p in array:
+    x = []
+    y = []
+    for number_of_trees_to_classify_by_K in range(1, number_of_trees_in_comity_N + 1):
+        x.append(number_of_trees_to_classify_by_K)
+        accuracy = KNN(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
+        if accuracy >= greatest_accuracy:
+            print("p = ", p,"k = ", number_of_trees_to_classify_by_K,accuracy)
+            greatest_accuracy = accuracy
+        y.append(accuracy)
+    plt.plot(x, y)
+    plt.xlabel('number_of_trees_to_classify_by(K)')
+    plt.ylabel('accuracy')
+    plt.title('p = ' + str(p))
+    plt.show()
+
+# array = [0.3, 0.4, 0.5, 0.6, 0.7]
+# number_of_trees_in_comity_N = 5  # number of trees# 20 is also okay
+# for p in array:
+#     for number_of_trees_to_classify_by_K in range(1, number_of_trees_in_comity_N + 1):
+#         accuracy = KNN(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
+#         print("p = ", p,"k = ", number_of_trees_to_classify_by_K,accuracy)
+#
+
+
+# p = 0.6
+# x = [0,1,2]
+# y = [1,2,3]
+# plt.plot(x, y)
+# plt.xlabel('x - number_of_trees_to_classify_by(K)')
+# plt.ylabel('y - accuracy')
+# plt.xlabel('x - number_of_trees_to_classify_by(K)')
+# plt.ylabel('y - accuracy')
+# plt.title('p = ' + str(p))
+# plt.show()

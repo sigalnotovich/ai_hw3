@@ -7,17 +7,35 @@ import numpy as np
 import pandas as pd
 import random
 
+import sklearn
+
 from ID3 import Node, fit, getAttributeCalumn, getMajorityClass, printTree
 
 
-#todo: check
+
+# #ex7 todo
+# def get_normalized_centroid(df,random_data): #the centroid will have only the features in its vector
+#     #pd.DataFrame(random_data).to_csv("C:/My Stuff/studies/2021a/AI/hw3/random_data.csv") #todo:remove
+#     number_of_features = len(df[0])
+#     len_of_random_data = len(random_data)
+#     feature_average_array = []
+#     for feature_place in range(1, number_of_features):  # for each feature #the first feature is diagnostic so i give it out
+#         sum_for_feature = 0
+#         for i in random_data:
+#             feature_value_in_line_i = i[feature_place]
+#             sum_for_feature += feature_value_in_line_i
+#         average = sum_for_feature/len_of_random_data
+#         feature_average_array.append(average)  # without the first feature which is diagnostic,is it okay?
+#     return feature_average_array
+#
+# #todo: check
 
 
 
 #todo : normalize the centroid so that the distance in the classification will be from all the vectore
 #cheked
 def get_centroid(df,random_data): #the centroid will have only the features in its vector
-    pd.DataFrame(random_data).to_csv("C:/My Stuff/studies/2021a/AI/hw3/random_data.csv") #todo:remove
+    #pd.DataFrame(random_data).to_csv("C:/My Stuff/studies/2021a/AI/hw3/random_data.csv") #todo:remove
     number_of_features = len(df[0])
     len_of_random_data = len(random_data)
     feature_average_array = []
@@ -146,6 +164,39 @@ def get_euclidean_dist(vec1,vec2):
 # accuracy = KNN(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
 # print(accuracy)
 
+#
+# def k_fold_train_and_test_on_the_train_csv(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K,predict_or_loss):
+#     df = pd.read_csv("train.csv", header=0)
+#     data_without_header = df.to_numpy()
+#
+#     with open('train.csv', newline='') as f:
+#         reader = csv.reader(f)
+#         header = next(reader)
+#
+#     # df = (header, data_without_header)
+#     n_splits = 5
+#     kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=311342422) #todo: check id is : 311342422
+#     kf.get_n_splits(data_without_header)
+#     accuracy_sum = 0
+#     for train_index, test_index in kf.split(data_without_header):
+#         train_data = []
+#         test_data = []
+#         for index in train_index:
+#             train_data.append(data_without_header[index])
+#         for index in test_index:
+#             test_data.append(data_without_header[index])
+#         df_train = (header, train_data)
+#         node = Node()
+#         KNN(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
+#         #fit(df_train, node, early_pruning_parameter) #todo:change to KNN
+#         #printTree(node)
+#         df_test = (header, test_data)
+#         accuracy_or_loss = predict_or_loss(df_test, node) #change to check on KNN
+#         #print(accuracy)
+#         accuracy_sum += accuracy_or_loss
+#     accuracy_mean = accuracy_sum/n_splits
+#     #print(accuracy_mean)
+#     return accuracy_mean
 
 ## graphs:
 array = [0.3, 0.4, 0.5, 0.6, 0.7]

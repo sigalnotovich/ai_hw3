@@ -123,7 +123,7 @@ def get_standard_deviation_array(avg_array,data_without_header_and_without_first
 
 
 
-
+# cheked
 def get_avg_and_standard_deviation_vec_from_data(data_without_header):
     pd.DataFrame(data_without_header).to_csv("C:/My Stuff/studies/2021a/AI/hw3/data_without_header.csv") #todo:remove
     #data = data_without_header
@@ -136,8 +136,7 @@ def get_avg_and_standard_deviation_vec_from_data(data_without_header):
     avg_array = get_avg_array(data_without_header_and_without_first_col,len_of_data)
     standard_deviation_array = get_standard_deviation_array(avg_array,data_without_header_and_without_first_col,len_of_data)
 
-    return
-
+    return avg_array, standard_deviation_array
 
 def KNN(data_without_header,test_data_without_header,header,p, number_of_trees_N, k):
     true = 0
@@ -145,7 +144,7 @@ def KNN(data_without_header,test_data_without_header,header,p, number_of_trees_N
     trees_array = bulilt_N_trees(header,data_without_header,number_of_trees_N,p)
     #printTree(trees_array[0][0]) #todo:remove
     #check the classification of examples in test.csv:
-    get_avg_and_standard_deviation_vec_from_data(data_without_header) #return vectores without the first diagnosis column
+    #get_avg_and_standard_deviation_vec_from_data(data_without_header) #return vectores without the first diagnosis column
     for line_to_classify in test_data_without_header:
         real_classification_for_line = line_to_classify[0]
         line_to_classify_without_classification = np.delete(line_to_classify, [0]) #todo: test it removes the first element
@@ -166,6 +165,7 @@ def KNN(data_without_header,test_data_without_header,header,p, number_of_trees_N
     return accuracy
         #chose the most classification
         #check if it is the correct one
+
 
 
 #cheked
@@ -229,41 +229,41 @@ with open('train.csv', newline='') as f:
 
 
 #graphs:
-array = [0.3, 0.4, 0.5, 0.6, 0.7]
-#array = [0.3]
-for i in range(0,5):
-    print("------------round",i,"-----------")
-    greatest_accuracy = 0
-    number_of_trees_in_comity_N = 10  # number of trees# 20 is also okay
-    for p in array:
-        x = []
-        y = []
-        for number_of_trees_to_classify_by_K in range(1, number_of_trees_in_comity_N + 1):
-            x.append(number_of_trees_to_classify_by_K)
-            accuracy_mean = k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-            ##accuracy = KNN(data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-            if accuracy_mean >= greatest_accuracy:
-                print("p = ", p,"k = ", number_of_trees_to_classify_by_K, accuracy_mean)
-                greatest_accuracy = accuracy_mean
-            y.append(accuracy_mean)
-        plt.plot(x, y)
-        plt.xlabel('number_of_trees_to_classify_by(K)')
-        plt.ylabel('accuracy')
-        plt.title('p = ' + str(p))
-        plt.show()
+# array = [0.3, 0.4, 0.5, 0.6, 0.7]
+# #array = [0.3]
+# for i in range(0,5):
+#     print("------------round",i,"-----------")
+#     greatest_accuracy = 0
+#     number_of_trees_in_comity_N = 10  # number of trees# 20 is also okay
+#     for p in array:
+#         x = []
+#         y = []
+#         for number_of_trees_to_classify_by_K in range(1, number_of_trees_in_comity_N + 1):
+#             x.append(number_of_trees_to_classify_by_K)
+#             accuracy_mean = k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
+#             ##accuracy = KNN(data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
+#             if accuracy_mean >= greatest_accuracy:
+#                 print("p = ", p,"k = ", number_of_trees_to_classify_by_K, accuracy_mean)
+#                 greatest_accuracy = accuracy_mean
+#             y.append(accuracy_mean)
+#         plt.plot(x, y)
+#         plt.xlabel('number_of_trees_to_classify_by(K)')
+#         plt.ylabel('accuracy')
+#         plt.title('p = ' + str(p))
+#         plt.show()
 
 
 
 
 ##checked with 1 1 1
-# df_test = pd.read_csv("test.csv", header=0)
-# test_data_without_header = df_test.to_numpy()
-#
-# p = 1 #is number of exmaples will be choosen from all the examples for each Tree
-# number_of_trees_in_comity_N = 1 #number of trees
-# number_of_trees_to_classify_by_K = 1
-# accuracy = KNN(data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
-# print(accuracy)
+df_test = pd.read_csv("test.csv", header=0)
+test_data_without_header = df_test.to_numpy()
+
+p = 1 #is number of exmaples will be choosen from all the examples for each Tree
+number_of_trees_in_comity_N = 1 #number of trees
+number_of_trees_to_classify_by_K = 1
+accuracy = KNN(data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
+print(accuracy)
 
 
 # array = [0.3, 0.4, 0.5, 0.6, 0.7]

@@ -2,6 +2,8 @@
 
 #choose n*p(p is a parameter) for the training set:
 import csv
+import functools
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -39,7 +41,7 @@ def get_centroid(df,random_data): #the centroid will have only the features in i
     number_of_features = len(df[0])
     len_of_random_data = len(random_data)
     feature_average_array = []
-    for feature_place in range(1, number_of_features):  # for each feature #the first feature is diagnostic so i give it out
+    for feature_place in range(1, number_of_features):  # for each feature #the first feature is diagnostic so i let it out
         sum_for_feature = 0
         for i in random_data:
             feature_value_in_line_i = i[feature_place]
@@ -63,7 +65,7 @@ def getClassification(header,node,line_to_classify):
             return getClassification(header, node.right,line_to_classify)  # above or equal to limit
 
 #checked
-def bulilt_N_trees(header,data_without_header,number_of_trees_N):
+def bulilt_N_trees(header,data_without_header,number_of_trees_N,p):
     tree_array = []
     n = len(data_without_header)
     for i in range(0, number_of_trees_N):
@@ -97,14 +99,53 @@ def getMajorityTreesClasification(header,line_to_classify_without_classification
     majority_classification = getMajorityClass(k_classification_array)
     return majority_classification
 
+# checked
+def get_avg_array(data_without_header_and_without_first_col,len_of_data):
+    array = np.array(data_without_header_and_without_first_col)
+    sum_array = array.sum(axis=0)  # checkd
+    avg_array = [x / len_of_data for x in sum_array]
+    return avg_array
+
+# cheked
+def get_standard_deviation_array(avg_array,data_without_header_and_without_first_col,m):
+    pow_inner_parentasis_list = []
+    for line in data_without_header_and_without_first_col:
+        a = np.matrix(line)
+        b = np.matrix(avg_array)
+        inner_parentasis = a - b  #(fi(xj)-mi) #for each line substract the avg
+        inner_parentasis_list = inner_parentasis.tolist()[0]
+        pow_inner_parentasis = [pow(x,2) for x in inner_parentasis_list]# (fi(xj)-mi)^2 #for each line substract the avg
+        pow_inner_parentasis_list.append(pow_inner_parentasis)
+    array = np.array(pow_inner_parentasis_list)
+    sum_array = array.sum(axis=0)
+    standard_deviation_array = [np.math.sqrt(x / (m - 1)) for x in sum_array]
+    return standard_deviation_array
+
+
+
+
+def get_avg_and_standard_deviation_vec_from_data(data_without_header):
+    pd.DataFrame(data_without_header).to_csv("C:/My Stuff/studies/2021a/AI/hw3/data_without_header.csv") #todo:remove
+    #data = data_without_header
+    #m = len(data_without_header)
+    data_without_header_and_without_first_col =[] #without diagnosis
+    for row in data_without_header:
+        new_row_without_first_col = np.delete(row, [0])
+        data_without_header_and_without_first_col.append(new_row_without_first_col)
+    len_of_data = len(data_without_header)
+    avg_array = get_avg_array(data_without_header_and_without_first_col,len_of_data)
+    standard_deviation_array = get_standard_deviation_array(avg_array,data_without_header_and_without_first_col,len_of_data)
+
+    return
+
 
 def KNN(data_without_header,test_data_without_header,header,p, number_of_trees_N, k):
     true = 0
     false = 0
-    trees_array = bulilt_N_trees(header,data_without_header,number_of_trees_N)
+    trees_array = bulilt_N_trees(header,data_without_header,number_of_trees_N,p)
     #printTree(trees_array[0][0]) #todo:remove
     #check the classification of examples in test.csv:
-
+    get_avg_and_standard_deviation_vec_from_data(data_without_header) #return vectores without the first diagnosis column
     for line_to_classify in test_data_without_header:
         real_classification_for_line = line_to_classify[0]
         line_to_classify_without_classification = np.delete(line_to_classify, [0]) #todo: test it removes the first element
@@ -214,10 +255,10 @@ for i in range(0,5):
 
 
 
-# ##checked with 1 1 1
+##checked with 1 1 1
 # df_test = pd.read_csv("test.csv", header=0)
 # test_data_without_header = df_test.to_numpy()
-
+#
 # p = 1 #is number of exmaples will be choosen from all the examples for each Tree
 # number_of_trees_in_comity_N = 1 #number of trees
 # number_of_trees_to_classify_by_K = 1

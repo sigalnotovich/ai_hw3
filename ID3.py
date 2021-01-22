@@ -29,6 +29,11 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
                                                        list_of_B_and_M):
     entropy_list = []
 
+    #todo:remove
+    # print(df)
+    # print(attribute)
+    # print(unsorted_list_of_values)
+
     # get_borders on sorted values of the attribute: checked
     borders_func = lambda list: [(list[i] + list[i + 1]) / 2 for i in
                                  range(0, len(list) - 1)]

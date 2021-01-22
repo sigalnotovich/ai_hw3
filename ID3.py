@@ -247,7 +247,7 @@ def TDIDT(df, majority_class_df, MAX_IG, node,early_pruning_parameter):  # TDIDT
     #         node.classification = majority_class_df
     #         return None
     # majority_class = getMajorityClass(list_of_B_and_M) #todo: do i need it here?
-
+    node.majority = majority_class_df
     # choose best festure and best limit:
     best_entropy_dif, best_attribute_name, best_attribute_limit = MAX_IG(df, list_of_B_and_M)
     # save at node the best attribute and limit for it
@@ -286,6 +286,7 @@ class Node:
         self.right = None
         self.partition_feature_and_limit = None
         self.classification = None
+        self.majority = None
 
 def printTree(node, level=0):
     if node != None:
@@ -497,6 +498,8 @@ def ex4_1():
 
 def ex_4_1_loss_without_pruning():
     learn_and_test_no_pruning(loss_func)
+
+
 #experiment()
 #todo: check this is do commented
 #ex3_4()

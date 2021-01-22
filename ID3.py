@@ -30,9 +30,9 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
     entropy_list = []
 
     #todo:remove
-    # print(df)
-    # print(attribute)
-    # print(unsorted_list_of_values)
+    print(df)
+    print(attribute)
+    print(unsorted_list_of_values)
 
     # get_borders on sorted values of the attribute: checked
     borders_func = lambda list: [(list[i] + list[i + 1]) / 2 for i in
@@ -498,6 +498,8 @@ def ex_4_1_loss_without_pruning():
 #experiment()
 #todo: check this is do commented
 #ex3_4()
+
+print("ID3") #todo:remove
 ex1()
 #ex4_1()  #learn_on_all_the_train_csv_test_on_all_the_test_csv
 #ex_4_1_loss_without_pruning() #the loss without pruning

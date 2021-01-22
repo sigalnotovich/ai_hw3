@@ -35,19 +35,22 @@ from ID3 import Node, fit, getAttributeCalumn, getMajorityClass, printTree
 
 
 #todo : normalize the centroid so that the distance in the classification will be from all the vectore
-#cheked
-def get_centroid(df,random_data): #the centroid will have only the features in its vector
+#normalization with daviation gives me values smaller then 0
+def get_normalized_centroid(df, random_data,avg_array, standard_deviation_array): #the centroid will have only the features in its vector
     #pd.DataFrame(random_data).to_csv("C:/My Stuff/studies/2021a/AI/hw3/random_data.csv") #todo:remove
     number_of_features = len(df[0])
     len_of_random_data = len(random_data)
     feature_average_array = []
     for feature_place in range(1, number_of_features):  # for each feature #the first feature is diagnostic so i let it out
-        sum_for_feature = 0
+        avg = avg_array[feature_place - 1]
+        standard_deviation = standard_deviation_array[feature_place - 1]
+        sum_for_feature_normalized = 0
         for i in random_data:
             feature_value_in_line_i = i[feature_place]
-            sum_for_feature += feature_value_in_line_i
-        average = sum_for_feature/len_of_random_data
-        feature_average_array.append(average)  # without the first feature which is diagnostic,is it okay?
+            feature_value_in_line_i_normalized = abs((feature_value_in_line_i-avg)/standard_deviation)
+            sum_for_feature_normalized += feature_value_in_line_i_normalized
+        average_of_normalized = sum_for_feature_normalized/len_of_random_data
+        feature_average_array.append(average_of_normalized)  # without the first feature which is diagnostic,is it okay?
     return feature_average_array
 
 
@@ -64,15 +67,18 @@ def getClassification(header,node,line_to_classify):
         else:
             return getClassification(header, node.right,line_to_classify)  # above or equal to limit
 
+
 #checked
-def bulilt_N_trees(header,data_without_header,number_of_trees_N,p):
+def bulilt_N_trees_normalized(header, data_without_header, number_of_trees_N, p):
     tree_array = []
     n = len(data_without_header)
+    avg_array, standard_deviation_array = get_avg_and_standard_deviation_vec_from_data(data_without_header)
     for i in range(0, number_of_trees_N):
         number_of_random = round(p*n)
         random_data = random.sample(list(data_without_header), number_of_random)# no duplicate
         df = (header, random_data)
-        centroid = get_centroid(df,random_data)#cheked
+        centroid = get_normalized_centroid(df, random_data,avg_array, standard_deviation_array)#cheked
+        #normalize_line(avg_array, standard_deviation_array,centroid)
         node = Node()
         fit(df, node) #fit = algorithm ID3 thet used in ID3.py  #no pruning todo: maybe change to with pruning
         #printTree(node)
@@ -80,13 +86,13 @@ def bulilt_N_trees(header,data_without_header,number_of_trees_N,p):
     return tree_array
 
 
-def get_dist_from_all_trees_centroid(trees_array,line_to_classify_without_classification):
+def get_dist_from_all_trees_centroid(trees_array,normalized_line):
     #printTree(trees_array[0][0])
     tree_dist_arr = []
-    for tree, centroid in trees_array:
+    for tree, normalized_centroid in trees_array:
         #printTree(tree)
-        euclidean_dist = get_euclidean_dist(line_to_classify_without_classification, centroid)
-        # dist = np.linalg.norm(line_to_classify_without_classification - centroid)
+        euclidean_dist = get_euclidean_dist(normalized_line, normalized_centroid)
+        # dist = np.linalg.norm(line_to_classify_without_classification - normalized_centroid)
         tree_dist_arr.append((euclidean_dist, tree))
     return tree_dist_arr
 
@@ -138,17 +144,26 @@ def get_avg_and_standard_deviation_vec_from_data(data_without_header):
 
     return avg_array, standard_deviation_array
 
-def KNN(data_without_header,test_data_without_header,header,p, number_of_trees_N, k):
+
+def normalize_line(avg_array, standard_deviation_array,line):
+    new_line = []
+    for i in range(0,len(line)):
+        value = abs((line[i] - avg_array[i])/standard_deviation_array[i])
+        new_line.append(value)
+    return new_line
+
+def normalized_KNN(data_without_header,test_data_without_header,header,p, number_of_trees_N, k):
     true = 0
     false = 0
-    trees_array = bulilt_N_trees(header,data_without_header,number_of_trees_N,p)
+    trees_array = bulilt_N_trees_normalized(header, data_without_header, number_of_trees_N, p)
     #printTree(trees_array[0][0]) #todo:remove
     #check the classification of examples in test.csv:
-    #get_avg_and_standard_deviation_vec_from_data(data_without_header) #return vectores without the first diagnosis column
+    avg_array, standard_deviation_array = get_avg_and_standard_deviation_vec_from_data(data_without_header) #return vectores without the first diagnosis column
     for line_to_classify in test_data_without_header:
         real_classification_for_line = line_to_classify[0]
         line_to_classify_without_classification = np.delete(line_to_classify, [0]) #todo: test it removes the first element
-        tree_dist_arr = get_dist_from_all_trees_centroid(trees_array, line_to_classify_without_classification)
+        normalized_line = normalize_line(avg_array, standard_deviation_array, line_to_classify_without_classification)
+        tree_dist_arr = get_dist_from_all_trees_centroid(trees_array, normalized_line)
         #printTree(tree_dist_arr[0][1])
         trees_sorted_by_dist = sorted(tree_dist_arr, key=lambda tup: tup[0])
         #printTree(trees_sorted_by_dist[0][1])
@@ -211,7 +226,7 @@ def k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N
             train_data_without_header.append(data_without_header[index])
         for index in test_index:
             test_data_without_header.append(data_without_header[index])
-        accuracy = KNN(train_data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
+        accuracy = normalized_KNN(train_data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
         accuracy_sum += accuracy
     accuracy_mean = accuracy_sum/n_splits
     #print(accuracy_mean)
@@ -228,7 +243,7 @@ with open('train.csv', newline='') as f:
     header = next(reader)
 
 
-#graphs:
+##graphs:
 array = [0.3, 0.4, 0.5, 0.6, 0.7]
 #array = [0.3]
 for i in range(0,5):
@@ -241,10 +256,11 @@ for i in range(0,5):
         for number_of_trees_to_classify_by_K in range(1, number_of_trees_in_comity_N + 1):
             x.append(number_of_trees_to_classify_by_K)
             accuracy_mean = k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-            ##accuracy = KNN(data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-            if accuracy_mean >= greatest_accuracy:
-                print("p = ", p,"k = ", number_of_trees_to_classify_by_K, accuracy_mean)
-                greatest_accuracy = accuracy_mean
+            #accuracy = normalized_KNN(data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
+            print("p = ", p, "k = ", number_of_trees_to_classify_by_K, accuracy_mean)
+            # if accuracy_mean >= greatest_accuracy:
+            #     print("p = ", p,"k = ", number_of_trees_to_classify_by_K, accuracy_mean)
+            #     greatest_accuracy = accuracy_mean
             y.append(accuracy_mean)
         plt.plot(x, y)
         plt.xlabel('number_of_trees_to_classify_by(K)')
@@ -256,15 +272,14 @@ for i in range(0,5):
 
 
 ##checked with 1 1 1
-df_test = pd.read_csv("test.csv", header=0)
-test_data_without_header = df_test.to_numpy()
-
-p = 1 #is number of exmaples will be choosen from all the examples for each Tree
-number_of_trees_in_comity_N = 1 #number of trees
-number_of_trees_to_classify_by_K = 1
-accuracy = KNN(data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
-print("KNN") #todo: remove
-print(accuracy)
+# df_test = pd.read_csv("test.csv", header=0)
+# test_data_without_header = df_test.to_numpy()
+#
+# p = 1 #is number of exmaples will be choosen from all the examples for each Tree
+# number_of_trees_in_comity_N = 1 #number of trees
+# number_of_trees_to_classify_by_K = 1
+# accuracy = normalized_KNN(data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
+# print(accuracy)
 
 
 # array = [0.3, 0.4, 0.5, 0.6, 0.7]

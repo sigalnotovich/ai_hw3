@@ -30,9 +30,9 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
     entropy_list = []
 
     #todo:remove
-    print(df)
-    print(attribute)
-    print(unsorted_list_of_values)
+    # print(df)
+    # print(attribute)
+    # print(unsorted_list_of_values)
 
     # get_borders on sorted values of the attribute: checked
     borders_func = lambda list: [(list[i] + list[i + 1]) / 2 for i in
@@ -109,15 +109,17 @@ def get_best_IG(df, entropy_before_division):
         # print(attribute)
         list_of_values_of_attribute_i = [x[i] for x in df[1]]  # chcked
         # print(list_of_values_of_attribute_i)
-        received_entropy_list_for_an_attribute = find_entropy_for_different_divisions_for_attribute(df, attribute,
-                                                                                                    list_of_values_of_attribute_i,
-                                                                                                    number_of_columns_in_file,
-                                                                                                    list_of_B_and_M)
+        list_of_values_no_duplicates = list(dict.fromkeys(list_of_values_of_attribute_i))
+        if len(list_of_values_no_duplicates) > 1:
+            received_entropy_list_for_an_attribute = find_entropy_for_different_divisions_for_attribute(df, attribute,
+                                                                                                        list_of_values_of_attribute_i,
+                                                                                                        number_of_columns_in_file,
+                                                                                                        list_of_B_and_M)
 
-        IG_list_for_attribute = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in received_entropy_list_for_an_attribute]
-        IG_dif, attribute_name, attribute_limit = max(IG_list_for_attribute, key=lambda item: item[0])
-        if IG_dif >= best_IG_dif:
-            best_IG_dif, best_attribute_name, best_attribute_limit = IG_dif, attribute_name, attribute_limit
+            IG_list_for_attribute = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in received_entropy_list_for_an_attribute]
+            IG_dif, attribute_name, attribute_limit = max(IG_list_for_attribute, key=lambda item: item[0])
+            if IG_dif >= best_IG_dif:
+                best_IG_dif, best_attribute_name, best_attribute_limit = IG_dif, attribute_name, attribute_limit
 
     return best_IG_dif, best_attribute_name, best_attribute_limit
 

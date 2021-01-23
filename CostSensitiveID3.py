@@ -79,7 +79,7 @@ def split_to_train_and_prune(data_without_header, train_present):
     return train_data, prune_data
 
 
-def costSensitiveID3(header,data_without_header):
+def costSensitiveID3(header,data_without_header,test_df):
     # 0.7 of the data to the tree
     #0.3 of the data to prune
     #then check loss on the test.csv
@@ -91,19 +91,11 @@ def costSensitiveID3(header,data_without_header):
     df = (header, train_without_header)
     node = Node()
     fit(df, node)
-    print("tree:")
-    printTree(node)
+    #print("tree:")
+    #printTree(node)
     prune_node = prune(node,prune_test_without_header,header)
-    print("pruned tree:")
-    printTree(prune_node)
-    df_test = pd.read_csv("test.csv", header=0)
-    test_data_without_header = df_test.to_numpy()
-
-    with open('test.csv', newline='') as t:
-        reader = csv.reader(t)
-        test_header = next(reader)
-
-    test_df = (test_header, test_data_without_header)
+    #print("pruned tree:")
+    #printTree(prune_node)
 
     loss = loss_func(test_df, prune_node)
     return loss
@@ -123,18 +115,18 @@ def new_test_and_train():
 
 
     all_lines = [y for x in [data_without_header, test_data_without_header] for y in x] # all_lines = data_without_header + test_data_without_header
-    test_data , train_data = train_test_split(all_lines, test_size=0.7)
+    test_data , train_data = train_test_split(all_lines, test_size=0.8)
 
     new_train = []
     new_test = []
-    new_train.append(header)
     new_train = [y for x in [new_train, train_data] for y in x]  # new_train = new_train + train_data
-    new_test.append(header)
     new_test = [y for x in [new_test, test_data] for y in x]  # new_test = new_test + test_data
 
-    return new_train,new_test
+    return new_train,new_test,header
 
-new_train,new_test = new_test_and_train()
+
+
+
 
 def call_costSensitiveID3_with_original_data():
     df = pd.read_csv("train.csv", header=0)
@@ -143,8 +135,24 @@ def call_costSensitiveID3_with_original_data():
     with open('train.csv', newline='') as f:
         reader = csv.reader(f)
         header = next(reader)
-    loss = costSensitiveID3(header,data_without_header)
+
+    df_test = pd.read_csv("test.csv", header=0)
+    test_data_without_header = df_test.to_numpy()
+
+    with open('test.csv', newline='') as t:
+        reader = csv.reader(t)
+        test_header = next(reader)
+
+    test_df = (test_header, test_data_without_header)
+
+    loss = costSensitiveID3(header,data_without_header,test_df)
     print(loss)
 
 
 call_costSensitiveID3_with_original_data()
+
+for i in range(0,20):
+    new_train_without_header, new_test_without_header, header = new_test_and_train()
+    test_df = (header,new_test_without_header)
+    loss = costSensitiveID3(header, new_train_without_header, test_df)
+    print(loss)

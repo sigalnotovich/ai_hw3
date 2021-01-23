@@ -36,7 +36,7 @@ from ID3 import Node, fit, getAttributeCalumn, getMajorityClass, printTree
 
 #todo : normalize the centroid so that the distance in the classification will be from all the vectore
 #normalization with daviation gives me values smaller then 0
-def get_normalized_centroid(df, random_data,avg_array, standard_deviation_array): #the centroid will have only the features in its vector
+def get_standart_daviation_normalized_centroid(df, random_data, avg_array, standard_deviation_array): #the centroid will have only the features in its vector
     #pd.DataFrame(random_data).to_csv("C:/My Stuff/studies/2021a/AI/hw3/random_data.csv") #todo:remove
     number_of_features = len(df[0])
     len_of_random_data = len(random_data)
@@ -47,7 +47,7 @@ def get_normalized_centroid(df, random_data,avg_array, standard_deviation_array)
         sum_for_feature_normalized = 0
         for i in random_data:
             feature_value_in_line_i = i[feature_place]
-            feature_value_in_line_i_normalized = abs((feature_value_in_line_i-avg)/standard_deviation)
+            feature_value_in_line_i_normalized = (feature_value_in_line_i-avg)/standard_deviation #todo: i removed the absolute value
             sum_for_feature_normalized += feature_value_in_line_i_normalized
         average_of_normalized = sum_for_feature_normalized/len_of_random_data
         feature_average_array.append(average_of_normalized)  # without the first feature which is diagnostic,is it okay?
@@ -77,7 +77,7 @@ def bulilt_N_trees_normalized(header, data_without_header, number_of_trees_N, p)
         number_of_random = round(p*n)
         random_data = random.sample(list(data_without_header), number_of_random)# no duplicate
         df = (header, random_data)
-        centroid = get_normalized_centroid(df, random_data,avg_array, standard_deviation_array)#cheked
+        centroid = get_standart_daviation_normalized_centroid(df, random_data, avg_array, standard_deviation_array)#cheked
         #normalize_line(avg_array, standard_deviation_array,centroid)
         node = Node()
         fit(df, node) #fit = algorithm ID3 thet used in ID3.py  #no pruning todo: maybe change to with pruning
@@ -95,6 +95,27 @@ def get_dist_from_all_trees_centroid(trees_array,normalized_line):
         # dist = np.linalg.norm(line_to_classify_without_classification - normalized_centroid)
         tree_dist_arr.append((euclidean_dist, tree))
     return tree_dist_arr
+
+
+def getMajorityTreesClasification_weighted(header,line_to_classify_without_classification, topKtrees):
+    k_classification_array = []
+    B_classification_value = 0
+    M_classification_value = 0
+    for dist, node in topKtrees:
+        #printTree(node)
+        classification = getClassification(header, node, line_to_classify_without_classification)
+        if classification == 'B':
+            B_classification_value += (1/dist)
+        if classification == 'M':
+            M_classification_value += (1/dist)
+
+        #dist * classification
+        # k_classification_array.append(classification)
+    # majority_classification = getMajorityClass(k_classification_array)
+    return 'B' if B_classification_value > M_classification_value else 'M'
+
+
+
 
 def getMajorityTreesClasification(header,line_to_classify_without_classification, topKtrees):
     k_classification_array = []
@@ -145,10 +166,10 @@ def get_avg_and_standard_deviation_vec_from_data(data_without_header):
     return avg_array, standard_deviation_array
 
 
-def normalize_line(avg_array, standard_deviation_array,line):
+def normalize_line_with_standard_deviation(avg_array, standard_deviation_array, line):
     new_line = []
     for i in range(0,len(line)):
-        value = abs((line[i] - avg_array[i])/standard_deviation_array[i])
+        value = (line[i] - avg_array[i])/standard_deviation_array[i]  #todo : i made it without abs for now
         new_line.append(value)
     return new_line
 
@@ -162,14 +183,14 @@ def normalized_KNN(data_without_header,test_data_without_header,header,p, number
     for line_to_classify in test_data_without_header:
         real_classification_for_line = line_to_classify[0]
         line_to_classify_without_classification = np.delete(line_to_classify, [0]) #todo: test it removes the first element
-        normalized_line = normalize_line(avg_array, standard_deviation_array, line_to_classify_without_classification)
+        normalized_line = normalize_line_with_standard_deviation(avg_array, standard_deviation_array, line_to_classify_without_classification)
         tree_dist_arr = get_dist_from_all_trees_centroid(trees_array, normalized_line)
         #printTree(tree_dist_arr[0][1])
         trees_sorted_by_dist = sorted(tree_dist_arr, key=lambda tup: tup[0])
         #printTree(trees_sorted_by_dist[0][1])
         topKtrees = trees_sorted_by_dist[:k]
         #printTree(topKtrees[0][1])
-        majority_classification = getMajorityTreesClasification(header,line_to_classify_without_classification, topKtrees)
+        majority_classification = getMajorityTreesClasification_weighted(header,line_to_classify_without_classification, topKtrees)
 
         if real_classification_for_line == majority_classification:
             true += 1

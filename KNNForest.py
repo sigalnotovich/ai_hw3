@@ -193,12 +193,17 @@ def get_euclidean_dist(vec1,vec2):
 
 def k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K):
     df = pd.read_csv("train.csv", header=0)
-    data_without_header = df.to_numpy()
+    train_without_header = df.to_numpy()
 
     with open('train.csv', newline='') as f:
         reader = csv.reader(f)
         header = next(reader)
 
+
+    df = pd.read_csv("test.csv", header=0)
+    test_data_without_header = df.to_numpy()
+
+    data_without_header = np.concatenate((train_without_header, test_data_without_header))
     # df = (header, data_without_header)
     n_splits = 5
     kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=311342422) #todo: check id is : 311342422
@@ -228,29 +233,29 @@ with open('train.csv', newline='') as f:
     header = next(reader)
 
 
-#graphs:
-# array = [0.3, 0.4, 0.5, 0.6, 0.7]
-# #array = [0.3]
-# for i in range(0,5):
-#     print("------------round",i,"-----------")
-#     greatest_accuracy = 0
-#     number_of_trees_in_comity_N = 10  # number of trees# 20 is also okay
-#     for p in array:
-#         x = []
-#         y = []
-#         for number_of_trees_to_classify_by_K in range(1, number_of_trees_in_comity_N + 1):
-#             x.append(number_of_trees_to_classify_by_K)
-#             accuracy_mean = k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-#             ##accuracy = KNN(data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-#             if accuracy_mean >= greatest_accuracy:
-#                 print("p = ", p,"k = ", number_of_trees_to_classify_by_K, accuracy_mean)
-#                 greatest_accuracy = accuracy_mean
-#             y.append(accuracy_mean)
-#         plt.plot(x, y)
-#         plt.xlabel('number_of_trees_to_classify_by(K)')
-#         plt.ylabel('accuracy')
-#         plt.title('p = ' + str(p))
-#         plt.show()
+##graphs:
+array = [0.3, 0.4, 0.5, 0.6, 0.7]
+#array = [0.3]
+for i in range(0,5):
+    print("------------round",i,"-----------")
+    greatest_accuracy = 0
+    number_of_trees_in_comity_N = 10  # number of trees# 20 is also okay
+    for p in array:
+        x = []
+        y = []
+        for number_of_trees_to_classify_by_K in range(1, number_of_trees_in_comity_N + 1):
+            x.append(number_of_trees_to_classify_by_K)
+            accuracy_mean = k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
+            ##accuracy = KNN(data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
+            if accuracy_mean >= greatest_accuracy:
+                print("p = ", p,"k = ", number_of_trees_to_classify_by_K, accuracy_mean)
+                greatest_accuracy = accuracy_mean
+            y.append(accuracy_mean)
+        plt.plot(x, y)
+        plt.xlabel('number_of_trees_to_classify_by(K)')
+        plt.ylabel('accuracy')
+        plt.title('p = ' + str(p))
+        plt.show()
 
 
 

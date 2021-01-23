@@ -4,6 +4,8 @@ import csv
 import sklearn.model_selection
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+
+from CostSensitiveID3anothertry import new_learn
 from ID3 import Node, fit, loss_func, getAttributeCalumn, printTree
 
 
@@ -31,6 +33,7 @@ def getAttributefeatureCalumn(header, partition_feature_and_limit):
             break
     return attribute_column
 
+
 def get_values_smaller_or_bigger_equal_to_partition(partition_feature_and_limit,prune_test_without_header,header):
     column = getAttributefeatureCalumn(header,partition_feature_and_limit)
     smaller_then_attribute = []
@@ -42,6 +45,7 @@ def get_values_smaller_or_bigger_equal_to_partition(partition_feature_and_limit,
         else:
             bigger_then_attribute.append(line)
     return smaller_then_attribute,bigger_then_attribute
+
 
 def evaluate(real_class, tree_classification):
     if real_class == tree_classification:
@@ -56,7 +60,8 @@ def prune(node,prune_test_without_header,header):
     if node.classification is not None:
         return node
 
-    data_smaller_then_attribute, data_bigger_then_attribute = get_values_smaller_or_bigger_equal_to_partition(node.partition_feature_and_limit,prune_test_without_header,header)
+    data_smaller_then_attribute, data_bigger_then_attribute = \
+        get_values_smaller_or_bigger_equal_to_partition(node.partition_feature_and_limit,prune_test_without_header,header)
     node.left = prune(node.left,data_smaller_then_attribute,header)
     node.right = prune(node.right,data_bigger_then_attribute,header)
 
@@ -79,24 +84,30 @@ def split_to_train_and_prune(data_without_header, train_present):
     return train_data, prune_data
 
 
+def k_fold_split_and_train_prune():
+    df = pd.read_csv("train.csv", header=0)
+    data_without_header = df.to_numpy()
+
+    n_splits = 5
+    kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=311342422) #todo: check id is : 311342422
+    kf.get_n_splits(data_without_header)
+
+    for train_index, test_index in kf.split(data_without_header):
+        train_data = []
+        prune_data = []
+        for index in train_index:
+            train_data.append(data_without_header[index])
+        for index in test_index:
+            prune_data.append(data_without_header[index])
+    return  train_data,prune_data
+
+
 def costSensitiveID3(header,data_without_header,test_df):
-    # 0.7 of the data to the tree
-    #0.3 of the data to prune
-    #then check loss on the test.csv
-
-
     train_without_header, prune_test_without_header = split_to_train_and_prune(data_without_header,0.5)
-    #train_without_header, prune_test_without_header = train_test_split(data_without_header, test_size=0.3)
-
     df = (header, train_without_header)
     node = Node()
     fit(df, node)
-    #print("tree:")
-    #printTree(node)
     prune_node = prune(node,prune_test_without_header,header)
-    #print("pruned tree:")
-    #printTree(prune_node)
-
     loss = loss_func(test_df, prune_node)
     return loss
 
@@ -125,9 +136,6 @@ def new_test_and_train():
     return new_train,new_test,header
 
 
-
-
-
 def call_costSensitiveID3_with_original_data():
     df = pd.read_csv("train.csv", header=0)
     data_without_header = df.to_numpy()
@@ -149,10 +157,8 @@ def call_costSensitiveID3_with_original_data():
     print(loss)
 
 
+
+print("prune:")
 call_costSensitiveID3_with_original_data()
 
-for i in range(0,20):
-    new_train_without_header, new_test_without_header, header = new_test_and_train()
-    test_df = (header,new_test_without_header)
-    loss = costSensitiveID3(header, new_train_without_header, test_df)
-    print(loss)
+

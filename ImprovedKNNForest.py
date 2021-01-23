@@ -229,12 +229,16 @@ def get_euclidean_dist(vec1,vec2):
 
 def normalized_k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K):
     df = pd.read_csv("train.csv", header=0)
-    data_without_header = df.to_numpy()
+    train_without_header = df.to_numpy()
 
     with open('train.csv', newline='') as f:
         reader = csv.reader(f)
         header = next(reader)
 
+    df = pd.read_csv("test.csv", header=0)
+    test_data_without_header = df.to_numpy()
+
+    data_without_header = np.concatenate((train_without_header, test_data_without_header))
     # df = (header, data_without_header)
     n_splits = 5
     kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=311342422) #todo: check id is : 311342422

@@ -4,6 +4,7 @@ import csv
 import sklearn.model_selection
 import matplotlib.pyplot as plt
 
+
 eps = np.finfo(float).eps
 from numpy import log2 as log
 
@@ -71,7 +72,7 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
         p_B_smaller_then_border = num_B_smaller_then_border / number_of_rows_smaller_then_border
         p_M_smaller_then_border = num_M_smaller_then_border / number_of_rows_smaller_then_border
         entropy_first_sun = - p_B_smaller_then_border * np.log2(p_B_smaller_then_border + eps) \
-                      - p_M_smaller_then_border * np.log2(p_M_smaller_then_border + eps)
+                      - 0.1* p_M_smaller_then_border * np.log2(p_M_smaller_then_border + eps) #todo : return 0.1
 
         num_B_bigger_equal_then_border = len([value for value in sorted_values_with_B if value >= border])
         num_M_bigger_equal_then_border = len([value for value in sorted_values_with_M if value >= border])
@@ -79,7 +80,7 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
         p_B_bigger_equal_then_border = num_B_bigger_equal_then_border / number_of_rows_bigger_equal_then_border
         p_M_bigger_equal_then_border = num_M_bigger_equal_then_border / number_of_rows_bigger_equal_then_border
         entropy_second_sun = - p_B_bigger_equal_then_border * np.log2(p_B_bigger_equal_then_border + eps) \
-                       - p_M_bigger_equal_then_border * np.log2(p_M_bigger_equal_then_border + eps)
+                       - 0.1* p_M_bigger_equal_then_border * np.log2(p_M_bigger_equal_then_border + eps) #todo : return 0.1
 
         sum_of_smaller_then_border = num_B_smaller_then_border + num_M_smaller_then_border
         add_to_entropy_first_sun = sum_of_smaller_then_border / number_of_rows * entropy_first_sun
@@ -452,30 +453,6 @@ def learn_on_all_the_train_csv_test_on_all_the_test_csv(early_pruning_parameter,
     # printTree(node)
     print(accuracy_or_loss)
 
-def ex3_4():
-    early_pruning_parameter = 2
-    learn_on_all_the_train_csv_test_on_all_the_test_csv(early_pruning_parameter,predict)
-
-# for i in range(1,40):
-#     node = fit(i)
-#     print(i)
-#     accuracy = predict(node)
-#     #printTree(node)
-#     print(accuracy)
-
-# M = [1, 2, 3, 5, 8, 16, 30, 50, 80, 120]
-# for i in M:
-#    print("ex3 run with m = ", i)
-#    k_fold_train_and_test_on_the_train_csv(i)
-
-# for interest - check the accuracy when training on all the train.csv and check on the test.csv
-# M = [2, 16, 40, 120, 300]
-# for i in M:
-#    print("ex3 run with m = ", i)
-#    learn_on_all_the_train_csv_test_on_all_the_test_csv(i)
-#B- health , M - sick
-#FP = is B ,but classified as M
-#FN = is M, but classified as B
 
 def loss_func(df, node):
     FP = 0
@@ -492,19 +469,42 @@ def loss_func(df, node):
     return loss
 
 
-def ex4_1():
+def ID3_with_0_1():
     early_pruning_parameter = 2
     learn_on_all_the_train_csv_test_on_all_the_test_csv(early_pruning_parameter, loss_func)
 
-def ex_4_1_loss_without_pruning():
-    learn_and_test_no_pruning(loss_func)
+
+if __name__ ==  'CostSensitiveID3anothertry.py':
+    ID3_with_0_1()
 
 
-#experiment()
-#todo: check this is do commented
-#ex3_4()
-if __name__ ==  '__ID3__':
-    print("ID3") #todo:remove
-    ex1()
-#ex4_1()  #learn_on_all_the_train_csv_test_on_all_the_test_csv
-#ex_4_1_loss_without_pruning() #the loss without pruning
+
+#todo: remove:
+
+
+
+def new_learn(early_pruning_parameter,predict_or_loss_func, new_train,new_test,header):
+
+    df = (header, new_train)
+    node = Node()
+    #todo: change early_pruning_parameter to 2:
+    fit(df, node, early_pruning_parameter)
+
+
+    test_df = (header, new_test)
+
+    accuracy_or_loss = predict_or_loss_func(test_df, node)
+    # printTree(node)
+    print(accuracy_or_loss)
+
+
+
+# def try_on_new_test_and_train():
+#     early_pruning_parameter = 2
+#     new_train,new_test,header = new_test_and_train()
+#     new_learn(early_pruning_parameter, loss_func,new_train,new_test,header)
+#
+# print("costanothertry")
+# for i in range (0,20):
+#     try_on_new_test_and_train()
+

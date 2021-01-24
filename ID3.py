@@ -503,9 +503,7 @@ def ex_4_1_loss_without_pruning():
 #experiment()
 #todo: check this is do commented
 #ex3_4()
-if __name__ ==  '__ID3__':
-    print("ID3") #todo:remove
-    ex1()
+ex1()
 #ex4_1()  #learn_on_all_the_train_csv_test_on_all_the_test_csv
 #ex_4_1_loss_without_pruning() #the loss without pruning
 

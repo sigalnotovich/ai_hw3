@@ -11,6 +11,7 @@ import random
 
 import sklearn
 
+from CostSensitiveID3 import new_test_and_train
 from ID3 import Node, fit, getAttributeCalumn, getMajorityClass, printTree
 
 
@@ -36,6 +37,9 @@ from ID3 import Node, fit, getAttributeCalumn, getMajorityClass, printTree
 
 #todo : normalize the centroid so that the distance in the classification will be from all the vectore
 #normalization with daviation gives me values smaller then 0
+from KNNForest import KNN, expiriment_original_knn
+
+
 def get_standart_daviation_normalized_centroid(df, random_data, avg_array, standard_deviation_array): #the centroid will have only the features in its vector
     #pd.DataFrame(random_data).to_csv("C:/My Stuff/studies/2021a/AI/hw3/random_data.csv") #todo:remove
     number_of_features = len(df[0])
@@ -224,78 +228,39 @@ def get_euclidean_dist(vec1,vec2):
 #
 # print("fin")
 
-
-
-
-def normalized_k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K):
-    df = pd.read_csv("train.csv", header=0)
-    train_without_header = df.to_numpy()
-
-    with open('train.csv', newline='') as f:
-        reader = csv.reader(f)
-        header = next(reader)
-
-    df = pd.read_csv("test.csv", header=0)
-    test_data_without_header = df.to_numpy()
-
-    data_without_header = np.concatenate((train_without_header, test_data_without_header))
-    # df = (header, data_without_header)
-    n_splits = 5
-    kf = sklearn.model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=311342422) #todo: check id is : 311342422
-    kf.get_n_splits(data_without_header)
-    accuracy_sum = 0
-    for train_index, test_index in kf.split(data_without_header):
-        train_data_without_header = []
-        test_data_without_header = []
-        for index in train_index:
-            train_data_without_header.append(data_without_header[index])
-        for index in test_index:
-            test_data_without_header.append(data_without_header[index])
-        accuracy = normalized_KNN(train_data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-        accuracy_sum += accuracy
-    accuracy_mean = accuracy_sum/n_splits
-    #print(accuracy_mean)
-    return accuracy_mean
+#data_without_header = np.concatenate((train_without_header, test_data_without_header))
+# df = pd.read_csv("train.csv", header=0)
+# data_without_header = df.to_numpy()
+#
+# with open('train.csv', newline='') as f:
+#     reader = csv.reader(f)
+#     header = next(reader)
+#
+# df_test = pd.read_csv("test.csv", header=0)
+# test_data_without_header = df_test.to_numpy()
+#
+# expiriment_original_knn(header,data_without_header,KNN)
 
 
 
 
-df = pd.read_csv("train.csv", header=0)
-data_without_header = df.to_numpy()
-
-with open('train.csv', newline='') as f:
-    reader = csv.reader(f)
-    header = next(reader)
-
-
-##graphs:
-array = [0.3, 0.4, 0.5, 0.6, 0.7]
-#array = [0.3]
-for i in range(0,5):
-    print("------------round",i,"-----------")
-    greatest_accuracy = 0
-    number_of_trees_in_comity_N = 10  # number of trees# 20 is also okay
-    for p in array:
-        x = []
-        y = []
-        for number_of_trees_to_classify_by_K in range(1, number_of_trees_in_comity_N + 1):
-            x.append(number_of_trees_to_classify_by_K)
-            accuracy_mean = normalized_k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-            ##accuracy = KNN(data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-            if accuracy_mean >= greatest_accuracy:
-                print("p = ", p,"k = ", number_of_trees_to_classify_by_K, accuracy_mean)
-                greatest_accuracy = accuracy_mean
-            y.append(accuracy_mean)
-        plt.plot(x, y)
-        plt.xlabel('number_of_trees_to_classify_by(K)')
-        plt.ylabel('accuracy')
-        plt.title('p = ' + str(p))
-        plt.show()
+new_train,new_test,header = new_test_and_train()
+print("original_KNN:")
+expiriment_original_knn(header,new_train,KNN)
+print("normalized_KNN")
+expiriment_original_knn(header,new_train,normalized_KNN)
 
 
 
 
 ##checked with 1 1 1
+# df = pd.read_csv("train.csv", header=0)
+# data_without_header = df.to_numpy()
+#
+# with open('train.csv', newline='') as f:
+#     reader = csv.reader(f)
+#     header = next(reader)
+
 # df_test = pd.read_csv("test.csv", header=0)
 # test_data_without_header = df_test.to_numpy()
 #

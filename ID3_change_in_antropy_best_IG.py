@@ -88,10 +88,27 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
         add_to_entropy_second_sun = sum_of_bigger_equal_then_border / number_of_rows * entropy_second_sun
 
         new_entropy = add_to_entropy_first_sun + add_to_entropy_second_sun
-        entropy_list.append((new_entropy, attribute, border))
+
+
+        majority_smaller_then_border = 'B' if num_B_smaller_then_border > num_M_smaller_then_border else 'M'
+        loss_smaller_then_border = getloss(majority_smaller_then_border,num_B_smaller_then_border,num_M_smaller_then_border)
+        majority_bigger_then_border = 'B' if num_B_bigger_equal_then_border > num_M_bigger_equal_then_border else 'M'
+        loss_bigger_then_border = getloss(majority_bigger_then_border,num_B_bigger_equal_then_border,num_M_bigger_equal_then_border)
+        loss = (loss_smaller_then_border + loss_bigger_then_border)/2
+
+        entropy_list.append((new_entropy, attribute, border,loss))
 
     return entropy_list
 
+def getloss(majority, number_of_B,number_of_M):
+    FP = 0
+    FN = 0
+    if majority == 'B':
+        FP += number_of_M
+    if majority == 'M' :
+        FN += number_of_B
+    loss = (0.1*FP + FN )/(number_of_B + number_of_M)
+    return  loss
 
 
 # get the entropy for all the attributes when each attribute devided to borders as we saw in the lecture
@@ -102,6 +119,7 @@ def get_best_IG(df, entropy_before_division):
     best_IG_dif = 0
     best_attribute_name = ""
     best_attribute_limit = 0
+    bestIG_params=[]
 
     # go over all the attributes in file - checked
     for i in range(1, number_of_columns_in_file):
@@ -116,11 +134,12 @@ def get_best_IG(df, entropy_before_division):
                                                                                                         number_of_columns_in_file,
                                                                                                         list_of_B_and_M)
 
-            IG_list_for_attribute = [(entropy_before_division - entropy, attribute, border) for entropy, attribute, border in received_entropy_list_for_an_attribute]
-            IG_dif, attribute_name, attribute_limit = max(IG_list_for_attribute, key=lambda item: item[0])
+            IG_list_for_attribute = [(entropy_before_division - entropy, attribute, border,loss) for entropy, attribute, border,loss in received_entropy_list_for_an_attribute]
+            IG_dif, attribute_name, attribute_limit,loss = max(IG_list_for_attribute, key=lambda item: item[0])
             if IG_dif >= best_IG_dif:
-                best_IG_dif, best_attribute_name, best_attribute_limit = IG_dif, attribute_name, attribute_limit
-
+                bestIG_params.append((IG_dif, attribute_name, attribute_limit,loss))
+                # best_IG_dif, best_attribute_name, best_attribute_limit = IG_dif, attribute_name, attribute_limit
+            best_IG_dif, best_attribute_name, best_attribute_limit ,loss = min(bestIG_params,key=lambda item: item[3])
     return best_IG_dif, best_attribute_name, best_attribute_limit
 
 def MAX_IG(df,list_of_B_and_M):
@@ -352,6 +371,8 @@ def return_prediction_good_or_bad_for_a_line_of_data(header, node, data_line):
 def ex1():
     learn_and_test_no_pruning(predict)
 
+
+
 def learn_and_test_no_pruning(predict_or_loss): #ex1
     df = pd.read_csv("train.csv", header=0)
     data_without_header = df.to_numpy()
@@ -503,13 +524,12 @@ def ex_4_1_loss_without_pruning():
 #experiment()
 #todo: check this is do commented
 #ex3_4()
-if __name__ ==  '__ID3__':
-    print("ID3") #todo:remove
-    ex1()
+print("ID3_with_loss") #todo:remove
+#ex1()
 #ex4_1()  #learn_on_all_the_train_csv_test_on_all_the_test_csv
 #ex_4_1_loss_without_pruning() #the loss without pruning
 
-def loss_original(data_without_header, test_data_without_header, header):
+def loss_changing_in_antropy(data_without_header, test_data_without_header, header):
     df = (header, data_without_header)
     node = Node()
     fit(df, node)

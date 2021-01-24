@@ -70,7 +70,7 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
         number_of_rows_smaller_then_border = num_B_smaller_then_border + num_M_smaller_then_border
         p_B_smaller_then_border = num_B_smaller_then_border / number_of_rows_smaller_then_border
         p_M_smaller_then_border = num_M_smaller_then_border / number_of_rows_smaller_then_border
-        entropy_first_sun = - p_B_smaller_then_border * np.log2(p_B_smaller_then_border + eps) \
+        entropy_first_sun = - 0.1* p_B_smaller_then_border * np.log2(p_B_smaller_then_border + eps) \
                       - p_M_smaller_then_border * np.log2(p_M_smaller_then_border + eps)
 
         num_B_bigger_equal_then_border = len([value for value in sorted_values_with_B if value >= border])
@@ -78,7 +78,7 @@ def find_entropy_for_different_divisions_for_attribute(df, attribute, unsorted_l
         number_of_rows_bigger_equal_then_border = num_B_bigger_equal_then_border + num_M_bigger_equal_then_border
         p_B_bigger_equal_then_border = num_B_bigger_equal_then_border / number_of_rows_bigger_equal_then_border
         p_M_bigger_equal_then_border = num_M_bigger_equal_then_border / number_of_rows_bigger_equal_then_border
-        entropy_second_sun = - p_B_bigger_equal_then_border * np.log2(p_B_bigger_equal_then_border + eps) \
+        entropy_second_sun = - 0.1* p_B_bigger_equal_then_border * np.log2(p_B_bigger_equal_then_border + eps) \
                        - p_M_bigger_equal_then_border * np.log2(p_M_bigger_equal_then_border + eps)
 
         sum_of_smaller_then_border = num_B_smaller_then_border + num_M_smaller_then_border
@@ -509,7 +509,7 @@ if __name__ ==  '__ID3__':
 #ex4_1()  #learn_on_all_the_train_csv_test_on_all_the_test_csv
 #ex_4_1_loss_without_pruning() #the loss without pruning
 
-def loss_original(data_without_header, test_data_without_header, header):
+def loss_original_0_1(data_without_header, test_data_without_header, header):
     df = (header, data_without_header)
     node = Node()
     fit(df, node)

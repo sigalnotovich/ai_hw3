@@ -6,7 +6,20 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
 from CostSensitiveID3anothertry import new_learn
-from ID3 import Node, fit, loss_func, getAttributeCalumn, printTree
+from ID3 import Node, fit, loss_func, getAttributeCalumn, printTree, loss_original
+
+
+from ID3_change_in_antropy_0_1 import loss_original_0_1
+from ID3_change_in_antropy_best_IG import loss_changing_in_antropy
+
+
+def getAttributeCalumn(header, node):
+    attribute_column = -1
+    for i in range(0, len(header)):
+        if header[i] == node.partition_feature_and_limit[0]:
+            attribute_column = i
+            break
+    return attribute_column
 
 
 #checked in ID3
@@ -17,7 +30,8 @@ def getClassification(header,node,line_to_classify):
     else:
         # there is partition here
         attribute_column = getAttributeCalumn(header, node)
-        value = line_to_classify[attribute_column-1]
+        value = line_to_classify[attribute_column]
+        #print(attribute_column,value,node.partition_feature_and_limit[1],node.classification)
         if value < node.partition_feature_and_limit[1]:#in new line i omited the first line with the classafication, thaths why -1
             return getClassification(header, node.left, line_to_classify)  # under limit
         else:
@@ -69,6 +83,7 @@ def prune(node,prune_test_without_header,header):
     err_prune = 0
     err_no_prune = 0
     for line in prune_test_without_header:
+        #print(line)
         err_prune += evaluate(line[0],node.majority)
         err_no_prune += evaluate(line[0],getClassification(header,node,line))
 
@@ -107,6 +122,7 @@ def costSensitiveID3(header,data_without_header,test_df):
     df = (header, train_without_header)
     node = Node()
     fit(df, node)
+    #printTree(node)
     prune_node = prune(node,prune_test_without_header,header)
     loss = loss_func(test_df, prune_node)
     return loss
@@ -114,13 +130,13 @@ def costSensitiveID3(header,data_without_header,test_df):
 
 
 def new_test_and_train():
-    df = pd.read_csv("train.csv", header=0)
+    df = pd.read_csv("mytrain.csv", header=0)
     data_without_header = df.to_numpy()
 
-    df_test = pd.read_csv("test.csv", header=0)
+    df_test = pd.read_csv("mytest.csv", header=0)
     test_data_without_header = df_test.to_numpy()
 
-    with open('train.csv', newline='') as f:
+    with open('mytrain.csv', newline='') as f:
         reader = csv.reader(f)
         header = next(reader)
 
@@ -136,7 +152,13 @@ def new_test_and_train():
     return new_train,new_test,header
 
 
-def call_costSensitiveID3_with_original_data():
+def call_costSensitiveID3():
+    header,data_without_header,test_df = getOriginalData()
+    loss = costSensitiveID3(header,data_without_header,test_df)
+    print(loss)
+
+
+def getOriginalData():
     df = pd.read_csv("train.csv", header=0)
     data_without_header = df.to_numpy()
 
@@ -152,13 +174,48 @@ def call_costSensitiveID3_with_original_data():
         test_header = next(reader)
 
     test_df = (test_header, test_data_without_header)
+    return header,data_without_header,test_df
 
-    loss = costSensitiveID3(header,data_without_header,test_df)
+
+
+
+def loss_after_prune(data_without_header, test_data_without_header, header):
+    test_df = (header, test_data_without_header)
+    loss = costSensitiveID3(header, data_without_header, test_df)
     print(loss)
 
 
+for i in range (0,5):
+    print('------round', i ,'-------')
+    data_without_header, test_data_without_header, header = new_test_and_train()
+    print("original_loss:")
+    loss_original(data_without_header, test_data_without_header, header)
+    print("changing in entropy change in the best IG")
+    loss_changing_in_antropy(data_without_header, test_data_without_header, header)
+    print("pruning:")
+    loss_after_prune(data_without_header, test_data_without_header, header)
+    print("loss_0_1_change:")
+    loss_original_0_1(data_without_header, test_data_without_header, header)
 
-print("prune:")
-call_costSensitiveID3_with_original_data()
 
+# def ex_4_1():
+#     learn_and_test_no_pruning_new_data(loss_func)
+#
+#
+# def learn_and_test_no_pruning_new_data(predict_or_loss):
+#
+#     df = (header, data_without_header)
+#     node = Node()
+#     fit(df, node)
+#     # printTree(node)
+#     test_df = (header, test_data_without_header)
+#
+#     accuracy = predict_or_loss(test_df, node)
+#     # printTree(node)
+#     print(accuracy)  # todo: check this is not commented
+#
+# print("runing new data with antalpya change")
+# call_costSensitiveID3()
+# for i in range (0,10):
+#     learn_and_test_no_pruning_new_data(loss_func)
 

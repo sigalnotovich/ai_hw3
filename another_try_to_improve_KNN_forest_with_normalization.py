@@ -11,6 +11,7 @@ import random
 
 import sklearn
 
+from CostSensitiveID3 import new_test_and_train
 from ID3 import Node, fit, getAttributeCalumn, getMajorityClass, printTree
 
 
@@ -19,6 +20,9 @@ from ID3 import Node, fit, getAttributeCalumn, getMajorityClass, printTree
 
 #todo : normalize the centroid so that the distance in the classification will be from all the vectore
 #cheked
+from KNNForest import expiriment_original_knn, KNN
+
+
 def get_centroid(df,random_data): #the centroid will have only the features in its vector
     #pd.DataFrame(random_data).to_csv("C:/My Stuff/studies/2021a/AI/hw3/random_data.csv") #todo:remove
     number_of_features = len(df[0])
@@ -255,6 +259,11 @@ array = [0.3, 0.4, 0.5, 0.6, 0.7]
 #         plt.show()
 
 
+new_train,new_test,header = new_test_and_train()
+print("original_KNN:")
+expiriment_original_knn(header,new_train,KNN)
+print("normalized_min_max_KNN")
+expiriment_original_knn(header,new_train,normalized_min_max_KNN)
 
 
 

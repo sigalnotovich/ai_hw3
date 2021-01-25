@@ -413,12 +413,13 @@ def k_fold_train_and_test_on_the_train_csv(early_pruning_parameter,predict_or_lo
 #ex 3
 def experiment():
     res_arr = []
-    M = [2, 16, 40, 120, 300]
+    M = [2, 5, 16, 40, 120]
     for i in M:
         #print("ex3 run with m = ", i)
         res = k_fold_train_and_test_on_the_train_csv(i,predict)
         #print(res)
         res_arr.append(res)
+        #print('M = ', i,'accuracy=' ,res) #todo:remove
     plt.plot(M, res_arr)
     # naming the x axis
     plt.xlabel('M')
@@ -500,12 +501,6 @@ def ex_4_1_loss_without_pruning():
     learn_and_test_no_pruning(loss_func)
 
 
-#experiment()
-#todo: check this is do commented
-#ex3_4()
-ex1()
-#ex4_1()  #learn_on_all_the_train_csv_test_on_all_the_test_csv
-#ex_4_1_loss_without_pruning() #the loss without pruning
 
 def loss_original(data_without_header, test_data_without_header, header):
     df = (header, data_without_header)
@@ -517,3 +512,15 @@ def loss_original(data_without_header, test_data_without_header, header):
     loss = loss_func(test_df, node)
     # printTree(node)
     print(loss)  # todo: check this is not commented
+
+ex1()
+# YOU KNOW WHAT TO DO :) JUST REMOVE THE  #:
+#experiment()
+
+
+
+#NOT RELEVANT:
+#ex3_4()
+#ex4_1()  #learn_on_all_the_train_csv_test_on_all_the_test_csv
+#ex_4_1_loss_without_pruning() #the loss without pruning
+

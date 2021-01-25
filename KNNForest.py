@@ -226,9 +226,9 @@ def expiriment_original_knn(header,data_without_header,KNN_func):
     array = [0.3, 0.4, 0.5, 0.6, 0.7]
     #array = [0.3]
 
-    #print("------------round",i,"-----------")
+
     greatest_accuracy = 0
-    number_of_trees_in_comity_N = 30  # number of trees# 20 is also okay
+    number_of_trees_in_comity_N = 10 # number of trees# 20 is also okay
     for p in array:
         x = []
         y = []
@@ -237,11 +237,8 @@ def expiriment_original_knn(header,data_without_header,KNN_func):
             accuracy_mean = k_fold_train_and_test_on_the_train_csv_forest(p,number_of_trees_in_comity_N,number_of_trees_to_classify_by_K,header,data_without_header,KNN_func)
             #accuracy_mean = KNN(data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
             if accuracy_mean >= greatest_accuracy:
-                print("greater one:")
                 print("p = ", p,"k = ", number_of_trees_to_classify_by_K, accuracy_mean)
                 greatest_accuracy = accuracy_mean
-            else:
-                print("p = ", p, "k = ", number_of_trees_to_classify_by_K, accuracy_mean)
             y.append(accuracy_mean)
         plt.plot(x, y)
         plt.xlabel('number_of_trees_to_classify_by(K)')
@@ -250,10 +247,11 @@ def expiriment_original_knn(header,data_without_header,KNN_func):
         plt.show()
 
 
-train,test,header = our_test_and_train()
-print("original_KNN on original data:")
-expiriment_original_knn(header,train,KNN)
-
+for i in range(0,10):
+    print("------------round",i,"-----------")
+    train,test,header = our_test_and_train()
+    print("original KNN:")
+    expiriment_original_knn(header,train,KNN)
 
 ##checked with 1 1 1
 # df_test = pd.read_csv("test.csv", header=0)

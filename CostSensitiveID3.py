@@ -201,37 +201,7 @@ def loss_after_prune(data_without_header, test_data_without_header, header):
     print(loss)
 
 
-# for i in range (0,5):
-#     print('------round', i ,'-------')
-#     data_without_header, test_data_without_header, header = new_test_and_train()
-#     print("original_loss:")
-#     loss_original(data_without_header, test_data_without_header, header)
-#     print("changing in entropy change in the best IG")
-#     loss_changing_in_antropy(data_without_header, test_data_without_header, header)
-#     print("pruning:")
-#     loss_after_prune(data_without_header, test_data_without_header, header)
-#     print("loss_0_1_change:")
-#     loss_original_0_1(data_without_header, test_data_without_header, header)
 
 
-# def ex_4_1():
-#     learn_and_test_no_pruning_new_data(loss_func)
-#
-#
-# def learn_and_test_no_pruning_new_data(predict_or_loss):
-#
-#     df = (header, data_without_header)
-#     node = Node()
-#     fit(df, node)
-#     # printTree(node)
-#     test_df = (header, test_data_without_header)
-#
-#     accuracy = predict_or_loss(test_df, node)
-#     # printTree(node)
-#     print(accuracy)  # todo: check this is not commented
-#
-# print("runing new data with antalpya change")
-# call_costSensitiveID3()
-# for i in range (0,10):
-#     learn_and_test_no_pruning_new_data(loss_func)
+call_costSensitiveID3()
 

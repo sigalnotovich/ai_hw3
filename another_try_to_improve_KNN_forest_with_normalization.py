@@ -267,8 +267,9 @@ array = [0.3, 0.4, 0.5, 0.6, 0.7]
 
 
 train,test,header = our_test_and_train()
+extended= train.extend(test)
 print("normalized_min_max_KNN on original data:")
-expiriment_original_knn(header,train,normalized_min_max_KNN)
+expiriment_original_knn(header,extended,normalized_min_max_KNN)
 
 
 

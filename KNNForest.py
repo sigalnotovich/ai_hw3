@@ -12,7 +12,7 @@ import random
 import sklearn
 
 from ID3 import Node, fit, getAttributeCalumn, getMajorityClass, printTree
-
+from CostSensitiveID3 import our_test_and_train
 
 
 # #ex7 todo
@@ -228,7 +228,7 @@ def expiriment_original_knn(header,data_without_header,KNN_func):
 
     #print("------------round",i,"-----------")
     greatest_accuracy = 0
-    number_of_trees_in_comity_N = 10  # number of trees# 20 is also okay
+    number_of_trees_in_comity_N = 30  # number of trees# 20 is also okay
     for p in array:
         x = []
         y = []
@@ -250,6 +250,9 @@ def expiriment_original_knn(header,data_without_header,KNN_func):
         plt.show()
 
 
+train,test,header = our_test_and_train()
+print("original_KNN on original data:")
+expiriment_original_knn(header,train,KNN)
 
 
 ##checked with 1 1 1

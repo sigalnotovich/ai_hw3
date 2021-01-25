@@ -11,7 +11,7 @@ import random
 
 import sklearn
 
-from CostSensitiveID3 import new_test_and_train
+from CostSensitiveID3 import new_test_and_train,our_test_and_train
 from ID3 import Node, fit, getAttributeCalumn, getMajorityClass, printTree
 
 
@@ -259,25 +259,31 @@ array = [0.3, 0.4, 0.5, 0.6, 0.7]
 #         plt.show()
 
 
-new_train,new_test,header = new_test_and_train()
-print("original_KNN:")
-expiriment_original_knn(header,new_train,KNN)
-print("normalized_min_max_KNN")
-expiriment_original_knn(header,new_train,normalized_min_max_KNN)
+#new_train,new_test,header = new_test_and_train()
+# print("original_KNN:")
+# expiriment_original_knn(header,new_train,KNN)
+# print("normalized_min_max_KNN")
+# expiriment_original_knn(header,new_train,normalized_min_max_KNN)
+
+
+train,test,header = our_test_and_train()
+print("normalized_min_max_KNN on original data:")
+expiriment_original_knn(header,train,normalized_min_max_KNN)
+
 
 
 
 #checked with 1 1 1
-df_test = pd.read_csv("test.csv", header=0)
-test_data_without_header = df_test.to_numpy()
-print("NORMALIZED KNN") #todo: remove
-for i in range(0,10):
-    p = 0.7 #is number of exmaples will be choosen from all the examples for each Tree
-    number_of_trees_in_comity_N = 10 #number of trees
-    number_of_trees_to_classify_by_K = 7
-    accuracy = normalized_min_max_KNN(data_without_header, test_data_without_header, header, p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
-
-    print(accuracy)
+# df_test = pd.read_csv("test.csv", header=0)
+# test_data_without_header = df_test.to_numpy()
+# print("NORMALIZED KNN") #todo: remove
+# for i in range(0,10):
+#     p = 0.7 #is number of exmaples will be choosen from all the examples for each Tree
+#     number_of_trees_in_comity_N = 10 #number of trees
+#     number_of_trees_to_classify_by_K = 7
+#     accuracy = normalized_min_max_KNN(data_without_header, test_data_without_header, header, p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
+#
+#     print(accuracy)
 
 
 # array = [0.3, 0.4, 0.5, 0.6, 0.7]

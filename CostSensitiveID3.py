@@ -152,6 +152,22 @@ def new_test_and_train():
     return new_train,new_test,header
 
 
+def our_test_and_train():
+    df = pd.read_csv("train.csv", header=0)
+    data_without_header = df.to_numpy()
+
+    df_test = pd.read_csv("test.csv", header=0)
+    test_data_without_header = df_test.to_numpy()
+
+    with open('train.csv', newline='') as f:
+        reader = csv.reader(f)
+        header = next(reader)
+
+    return data_without_header,test_data_without_header,header
+
+
+
+
 def call_costSensitiveID3():
     header,data_without_header,test_df = getOriginalData()
     loss = costSensitiveID3(header,data_without_header,test_df)

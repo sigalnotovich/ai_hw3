@@ -219,48 +219,26 @@ def k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N
 
 
 
-df = pd.read_csv("train.csv", header=0)
-data_without_header = df.to_numpy()
+if __name__ == '__main__':
+    df = pd.read_csv("train.csv", header=0)
+    data_without_header = df.to_numpy()
 
-with open('train.csv', newline='') as f:
-    reader = csv.reader(f)
-    header = next(reader)
-
-
-#new_train,new_test,header = new_test_and_train()
-# print("original_KNN:")
-# expiriment_original_knn(header,new_train,KNN)
-# print("normalized_min_max_KNN")
-# expiriment_original_knn(header,new_train,normalized_min_max_KNN)
+    with open('train.csv', newline='') as f:
+        reader = csv.reader(f)
+        header = next(reader)
 
 
-# for i in range(0,20):
-#     print("------------round",i,"-----------")
-#     train,test,header = our_test_and_train()
-#     extended_data = np.concatenate((train, test))
-#
-#     p = 0.6
-#     k = 21
-#     print("normalized_min_max_KNN on original data:", "p= ", p, ", k= ", k)
-#     expiriment_original_knn_p_and_k(header,extended_data,normalized_min_max_KNN,p,k)
-
-
-#
-# df_test = pd.read_csv("test.csv", header=0)
-# test_data_without_header = df_test.to_numpy()
-# print("noramlizedKNN on train and test")
-# accuracy_sum = 0
-# for i in range(0,10):
-#     p = 0.4 #is number of exmaples will be choosen from all the examples for each Tree
-#     number_of_trees_in_comity_N = 25 #number of trees
-#     number_of_trees_to_classify_by_K = 24
-#     accuracy = normalized_min_max_KNN(data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
-#     accuracy_sum += accuracy
-#
-# print(accuracy_sum/10)
+    df_test = pd.read_csv("test.csv", header=0)
+    test_data_without_header = df_test.to_numpy()
+    p = 0.4 #is number of exmaples will be choosen from all the examples for each Tree
+    number_of_trees_in_comity_N = 25 #number of trees
+    number_of_trees_to_classify_by_K = 24
+    accuracy = normalized_min_max_KNN(data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
+    print(accuracy)
 
 
 
+#NOT RELEVANT:
 #checked with 1 1 1
 # df_test = pd.read_csv("test.csv", header=0)
 # test_data_without_header = df_test.to_numpy()
@@ -282,14 +260,3 @@ with open('train.csv', newline='') as f:
 #         print("p = ", p,"k = ", number_of_trees_to_classify_by_K,accuracy)
 #
 
-
-# p = 0.6
-# x = [0,1,2]
-# y = [1,2,3]
-# plt.plot(x, y)
-# plt.xlabel('x - number_of_trees_to_classify_by(K)')
-# plt.ylabel('y - accuracy')
-# plt.xlabel('x - number_of_trees_to_classify_by(K)')
-# plt.ylabel('y - accuracy')
-# plt.title('p = ' + str(p))
-# plt.show()

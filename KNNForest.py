@@ -213,17 +213,6 @@ def k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N
     return accuracy_mean
 
 
-
-
-df = pd.read_csv("train.csv", header=0)
-data_without_header = df.to_numpy()
-
-with open('train.csv', newline='') as f:
-    reader = csv.reader(f)
-    header = next(reader)
-
-
-
 def expiriment_original_knn(header,data_without_header,KNN_func):
     ##graphs:
 
@@ -268,6 +257,26 @@ def expiriment_original_knn_p_and_k(header,data_without_header,KNN_func,p,number
     plt.title('p = ' + str(p) + str(KNN_func))
     plt.show()
 
+
+
+if __name__ == '__main__':
+    df = pd.read_csv("train.csv", header=0)
+    data_without_header = df.to_numpy()
+
+    with open('train.csv', newline='') as f:
+        reader = csv.reader(f)
+        header = next(reader)
+
+    df_test = pd.read_csv("test.csv", header=0)
+    test_data_without_header = df_test.to_numpy()
+    p = 0.4  # is number of exmaples will be choosen from all the examples for each Tree
+    number_of_trees_in_comity_N = 18  # number of trees
+    number_of_trees_to_classify_by_K = 17
+    accuracy = KNN(data_without_header, test_data_without_header, header, p, number_of_trees_in_comity_N,
+                   number_of_trees_to_classify_by_K)  # todo: train on p from 0.3 to 0.7
+    print(accuracy)
+
+#NOT RELEVANT:
 # for i in range(0,20):
 #     print("------------round",i,"-----------")
 #     train,test,header = our_test_and_train()
@@ -280,16 +289,18 @@ def expiriment_original_knn_p_and_k(header,data_without_header,KNN_func,p,number
 
 
 #checked with 1 1 1
-df_test = pd.read_csv("test.csv", header=0)
-test_data_without_header = df_test.to_numpy()
-print("noramlizedKNN on train and test")
-accuracy_sum = 0
-for i in range(0,10):
-    p = 0.4 #is number of exmaples will be choosen from all the examples for each Tree
-    number_of_trees_in_comity_N = 18 #number of trees
-    number_of_trees_to_classify_by_K = 17
-    accuracy = normalized_min_max_KNN(data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
-    accuracy_sum += accuracy
 
-print(accuracy_sum/10)
+# print("KNN on train and test")
+# accuracy_sum = 0
+# for i in range(0,20):
+#     p = 0.4 #is number of exmaples will be choosen from all the examples for each Tree
+#     number_of_trees_in_comity_N = 18 #number of trees
+#     number_of_trees_to_classify_by_K = 17
+#     accuracy = KNN(data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
+#     print(accuracy)
+#     accuracy_sum += accuracy
+
+
+
+
 

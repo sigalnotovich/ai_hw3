@@ -5,12 +5,8 @@ import sklearn.model_selection
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
-from CostSensitiveID3anothertry import new_learn
 from ID3 import Node, fit, loss_func, getAttributeCalumn, printTree, loss_original
 
-
-from ID3_change_in_antropy_0_1 import loss_original_0_1
-from ID3_change_in_antropy_best_IG import loss_changing_in_antropy
 
 
 def getAttributeCalumn(header, node):
@@ -202,6 +198,6 @@ def loss_after_prune(data_without_header, test_data_without_header, header):
 
 
 
-
-call_costSensitiveID3()
+if __name__ == '__main__':
+    call_costSensitiveID3()
 

@@ -513,9 +513,14 @@ def loss_original(data_without_header, test_data_without_header, header):
     # printTree(node)
     print(loss)  # todo: check this is not commented
 
-ex1()
-# YOU KNOW WHAT TO DO :) JUST REMOVE THE  #:
-#experiment()
+
+
+
+
+if __name__ == '__main__':
+    ex1()
+    # YOU KNOW WHAT TO DO :) JUST REMOVE THE  #:
+    #experiment()
 
 
 

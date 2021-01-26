@@ -15,14 +15,7 @@ from CostSensitiveID3 import new_test_and_train,our_test_and_train
 from ID3 import Node, fit, getAttributeCalumn, getMajorityClass, printTree
 
 
-
-
-
-#todo : normalize the centroid so that the distance in the classification will be from all the vectore
 #cheked
-from KNNForest import expiriment_original_knn, KNN
-
-
 def get_centroid(df,random_data): #the centroid will have only the features in its vector
     #pd.DataFrame(random_data).to_csv("C:/My Stuff/studies/2021a/AI/hw3/random_data.csv") #todo:remove
     number_of_features = len(df[0])
@@ -234,31 +227,6 @@ with open('train.csv', newline='') as f:
     header = next(reader)
 
 
-#graphs:
-array = [0.3, 0.4, 0.5, 0.6, 0.7]
-#array = [0.3]
-# for i in range(0,5):
-#     print("------------round",i,"-----------")
-#     greatest_accuracy = 0
-#     number_of_trees_in_comity_N = 10  # number of trees# 20 is also okay
-#     for p in array:
-#         x = []
-#         y = []
-#         for number_of_trees_to_classify_by_K in range(1, number_of_trees_in_comity_N + 1):
-#             x.append(number_of_trees_to_classify_by_K)
-#             accuracy_mean = k_fold_train_and_test_on_the_train_csv_forest(p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-#             ##accuracy = KNN(data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K)
-#             if accuracy_mean >= greatest_accuracy:
-#                 print("p = ", p,"k = ", number_of_trees_to_classify_by_K, accuracy_mean)
-#                 greatest_accuracy = accuracy_mean
-#             y.append(accuracy_mean)
-#         plt.plot(x, y)
-#         plt.xlabel('number_of_trees_to_classify_by(K)')
-#         plt.ylabel('accuracy')
-#         plt.title('p = ' + str(p))
-#         plt.show()
-
-
 #new_train,new_test,header = new_test_and_train()
 # print("original_KNN:")
 # expiriment_original_knn(header,new_train,KNN)
@@ -266,12 +234,30 @@ array = [0.3, 0.4, 0.5, 0.6, 0.7]
 # expiriment_original_knn(header,new_train,normalized_min_max_KNN)
 
 
-for i in range(0,10):
-    print("------------round",i,"-----------")
-    train,test,header = our_test_and_train()
-    print("normalized_min_max_KNN on original data:")
-    expiriment_original_knn(header,train,normalized_min_max_KNN)
+# for i in range(0,20):
+#     print("------------round",i,"-----------")
+#     train,test,header = our_test_and_train()
+#     extended_data = np.concatenate((train, test))
+#
+#     p = 0.6
+#     k = 21
+#     print("normalized_min_max_KNN on original data:", "p= ", p, ", k= ", k)
+#     expiriment_original_knn_p_and_k(header,extended_data,normalized_min_max_KNN,p,k)
 
+
+#
+# df_test = pd.read_csv("test.csv", header=0)
+# test_data_without_header = df_test.to_numpy()
+# print("noramlizedKNN on train and test")
+# accuracy_sum = 0
+# for i in range(0,10):
+#     p = 0.4 #is number of exmaples will be choosen from all the examples for each Tree
+#     number_of_trees_in_comity_N = 25 #number of trees
+#     number_of_trees_to_classify_by_K = 24
+#     accuracy = normalized_min_max_KNN(data_without_header,test_data_without_header,header,p, number_of_trees_in_comity_N, number_of_trees_to_classify_by_K) #todo: train on p from 0.3 to 0.7
+#     accuracy_sum += accuracy
+#
+# print(accuracy_sum/10)
 
 
 
